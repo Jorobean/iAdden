@@ -3,7 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>SwipeClean Beta</title>
+  <title>SwipeClean Beta — iAdden</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
   <style>
     :root {
       --bg: #ffffff;
@@ -33,10 +35,55 @@
       color: var(--text);
       font-family: 'Inter', 'Segoe UI', sans-serif;
       display: flex;
-      justify-content: center;
+      flex-direction: column;
       align-items: center;
+      padding: 2rem 1rem;
       min-height: 100vh;
       transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--border);
+      margin-bottom: 1rem;
+    }
+
+    .personal-header {
+      text-align: center;
+      max-width: 600px;
+      margin-bottom: 2rem;
+      opacity: 0.95;
+    }
+
+    .personal-header h2 {
+      margin: 0.2rem 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
+
+    .personal-header p {
+      margin: 0.2rem 0;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
+
+    .socials {
+      margin-top: 0.6rem;
+    }
+
+    .socials a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 1.4rem;
+      margin: 0 0.3rem;
+      transition: color 0.3s ease;
+    }
+
+    .socials a:hover {
+      color: var(--accent);
     }
 
     .card {
@@ -146,8 +193,20 @@
       });
     });
   </script>
+  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
 </head>
 <body>
+  <div class="personal-header">
+    <img src="your-image.jpg" alt="iAdden" class="profile-pic" />
+    <h2>Hi, I'm iAdden</h2>
+    <p>This is one of my projects — built with love and caffeine ☕️</p>
+    <div class="socials">
+      <a href="https://instagram.com/iadden" target="_blank" aria-label="Instagram">
+        <i class="fab fa-instagram"></i>
+      </a>
+    </div>
+  </div>
+
   <div class="card">
     <button class="toggle-theme" id="themeToggle" aria-label="Toggle theme">🌙</button>
     <h1>🧼 SwipeClean Beta</h1>

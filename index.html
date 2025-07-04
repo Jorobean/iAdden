@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SwipeClean Beta</title>
+  <style>
+    :root {
+      --bg: #ffffff;
+      --text: #1a1a1a;
+      --card: #f3f4f6;
+      --accent: #007aff;
+      --accent-hover: #005ecb;
+      --border: #e0e0e0;
+    }
+
+    [data-theme="dark"] {
+      --bg: #121212;
+      --text: #f0f0f0;
+      --card: #1f1f1f;
+      --accent: #0a84ff;
+      --accent-hover: #0066cc;
+      --border: #333;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .card {
+      background: var(--card);
+      border-radius: 16px;
+      padding: 2.5rem;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      border: 1px solid var(--border);
+      position: relative;
+      transition: background 0.3s ease, border 0.3s ease;
+    }
+
+    h1 {
+      font-size: 1.9rem;
+      margin: 0 0 0.5rem;
+    }
+
+    p.lead {
+      font-size: 1.1rem;
+      margin-bottom: 1.8rem;
+    }
+
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 1.2rem;
+      text-align: left;
+      font-size: 0.98rem;
+      margin: 1.5rem 0;
+    }
+
+    .steps div {
+      display: flex;
+      gap: 0.8rem;
+      align-items: flex-start;
+    }
+
+    .steps div i {
+      font-size: 1.2rem;
+      margin-top: 0.15rem;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background-color: var(--accent);
+      color: white;
+      padding: 0.9rem 1.6rem;
+      border: none;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    .cta-button:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .toggle-theme {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.4rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text);
+      transition: color 0.3s ease;
+    }
+
+    .footer {
+      font-size: 0.8rem;
+      margin-top: 2rem;
+      color: #999;
+    }
+
+    @media (max-width: 500px) {
+      .card {
+        padding: 2rem 1.5rem;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('themeToggle');
+      const saved = localStorage.getItem('theme');
+      if (saved === 'dark') {
+        document.documentElement.setAttribute('data-theme', 'dark');
+        btn.textContent = '☀️';
+      }
+
+      btn.addEventListener('click', () => {
+        const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+        document.documentElement.setAttribute('data-theme', isDark ? 'light' : 'dark');
+        btn.textContent = isDark ? '🌙' : '☀️';
+        localStorage.setItem('theme', isDark ? 'light' : 'dark');
+      });
+    });
+  </script>
+</head>
+<body>
+  <div class="card">
+    <button class="toggle-theme" id="themeToggle" aria-label="Toggle theme">🌙</button>
+    <h1>🧼 SwipeClean Beta</h1>
+    <p class="lead">Tinder for your photos. Swipe left to delete, right to keep. Done.</p>
+
+    <div class="steps">
+      <div><i>📲</i><span>Install <strong>TestFlight</strong> from the App Store</span></div>
+      <div><i>🚀</i><span>Tap below to join the beta on your iPhone</span></div>
+      <div><i>💡</i><span>Use it normally and send any feedback or bugs</span></div>
+    </div>
+
+    <a href="https://testflight.apple.com/join/hDVEmA4q" target="_blank" class="cta-button">Join the Beta</a>
+
+    <div class="footer">Thanks for shaping SwipeClean</div>
+  </div>
+</body>
+</html>

@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -127,12 +126,11 @@
     .steps div {
       display: flex;
       gap: 0.8rem;
-      align-items: flex-start;
+      align-items: center;
     }
 
     .steps div i {
       font-size: 1.2rem;
-      margin-top: 0.15rem;
     }
 
     .cta-button {
@@ -170,6 +168,7 @@
       font-size: 0.8rem;
       margin-top: 2rem;
       color: #999;
+      text-align: center;
     }
 
     @media (max-width: 500px) {
@@ -198,14 +197,17 @@
         btn.textContent = isDark ? '🌙' : '☀️';
         localStorage.setItem('theme', isDark ? 'light' : 'dark');
       });
+
+      const yearSpan = document.getElementById('year');
+      if (yearSpan) yearSpan.textContent = new Date().getFullYear();
     });
   </script>
 </head>
 <body>
   <div class="personal-header">
-    <img src="your-image.jpg" alt="iAdden" class="profile-pic" />
+    <img src="iadden.jpg" alt="iAdden" class="profile-pic" />
     <h2>Hi, I'm iAdden</h2>
-    <p>This is one of my projects — built with love and caffeine ☕️</p>
+    <p>Built with love and caffeine ☕️</p>
     <div class="socials">
       <a href="https://instagram.com/iadden" target="_blank" aria-label="Instagram">
         <i class="fab fa-instagram"></i>
@@ -215,18 +217,23 @@
 
   <div class="card">
     <button class="toggle-theme" id="themeToggle" aria-label="Toggle theme">🌙</button>
-    <h1>🧼 SwipeClean Beta</h1>
-    <p class="lead">Tinder for your photos. Swipe left to delete, right to keep. Done.</p>
+    <h1>SwipeClean Beta</h1>
+    <p class="lead">
+      Tinder for your photos.<br/>
+      Swipe left to delete, right to keep. Done.
+    </p>
 
     <div class="steps">
-      <div><i>📲</i><span>Install <strong>TestFlight</strong> from the App Store</span></div>
+      <div><i>📲</i><span>Install <a href="https://apps.apple.com/us/app/testflight/id899247664" target="_blank"><strong>TestFlight</strong></a> from the App Store</span></div>
       <div><i>🚀</i><span>Tap below to join the beta on your iPhone</span></div>
       <div><i>💡</i><span>Use it normally and send any feedback or bugs</span></div>
     </div>
 
     <a href="https://testflight.apple.com/join/hDVEmA4q" target="_blank" class="cta-button">Join the Beta</a>
 
-    <div class="footer">Thanks for shaping SwipeClean</div>
+    <div class="footer">Thanks for shaping SwipeClean!</div>
   </div>
+
+  <div class="footer">© iAdden <span id="year">2025</span></div>
 </body>
 </html>

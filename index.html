@@ -21,6 +21,17 @@
       --border: #e0e0e0;
     }
 
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121212;
+        --text: #f0f0f0;
+        --card: #1f1f1f;
+        --accent: #0a84ff;
+        --accent-hover: #0066cc;
+        --border: #333;
+      }
+    }
+
     [data-theme="dark"] {
       --bg: #121212;
       --text: #f0f0f0;
@@ -186,9 +197,16 @@
     window.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('themeToggle');
       const saved = localStorage.getItem('theme');
-      if (saved === 'dark') {
-        document.documentElement.setAttribute('data-theme', 'dark');
-        btn.textContent = '☀️';
+
+      if (saved) {
+        document.documentElement.setAttribute('data-theme', saved);
+        btn.textContent = saved === 'dark' ? '☀️' : '🌙';
+      } else {
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDark) {
+          document.documentElement.setAttribute('data-theme', 'dark');
+          btn.textContent = '☀️';
+        }
       }
 
       btn.addEventListener('click', () => {

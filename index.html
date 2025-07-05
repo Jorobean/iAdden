@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -8,29 +9,26 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
-  <!-- Font Awesome (Fix for Instagram icon) -->
+  <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
   <style>
     :root {
+      --bg: #121212;
+      --text: #f0f0f0;
+      --card: #1f1f1f;
+      --accent: #0a84ff;
+      --accent-hover: #0066cc;
+      --border: #333;
+    }
+
+    [data-theme="light"] {
       --bg: #e6e6e6;
       --text: #1a1a1a;
       --card: #f3f4f6;
       --accent: #007aff;
       --accent-hover: #005ecb;
       --border: #e0e0e0;
-    }
-
-    [data-theme="dark"],
-    @media (prefers-color-scheme: dark) {
-      :root {
-        --bg: #121212;
-        --text: #f0f0f0;
-        --card: #1f1f1f;
-        --accent: #0a84ff;
-        --accent-hover: #0066cc;
-        --border: #333;
-      }
     }
 
     * {
@@ -186,7 +184,7 @@
   </style>
 </head>
 <body>
-  <button class="toggle-theme" id="themeToggle" aria-label="Toggle theme">🌙</button>
+  <button class="toggle-theme" id="themeToggle" aria-label="Toggle theme">☀️</button>
 
   <div class="personal-header">
     <img src="iadden.jpg" alt="iAdden" class="profile-pic" />
@@ -221,8 +219,7 @@
     window.addEventListener('DOMContentLoaded', () => {
       const btn = document.getElementById('themeToggle');
       const saved = localStorage.getItem('theme');
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const defaultTheme = saved || (prefersDark ? 'dark' : 'light');
+      const defaultTheme = saved || 'dark';
 
       document.documentElement.setAttribute('data-theme', defaultTheme);
       btn.textContent = defaultTheme === 'dark' ? '☀️' : '🌙';

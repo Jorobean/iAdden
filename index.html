@@ -76,33 +76,68 @@
       color: var(--text);
     }
 
+    .typing-text {
+      border-right: 2px solid var(--text);
+      padding-right: 2px;
+      animation: blink 0.75s step-end infinite;
+    }
+
+    @keyframes blink {
+      from, to { border-color: transparent }
+      50% { border-color: var(--text) }
+    }
+
     .socials {
       margin-top: 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
     }
 
     .socials a {
       color: var(--text);
       text-decoration: none;
       font-size: 1.4rem;
-      margin: 0 0.3rem;
       transition: color 0.3s ease;
+      display: flex;
+      align-items: center;
     }
 
     .socials a:hover {
       color: var(--accent);
     }
 
+    .donate-icon {
+      width: 1.4rem;
+      height: 1.4rem;
+      transition: filter 0.3s ease;
+    }
+
+    /* Make donate icon black in light mode, white in dark mode */
+    [data-theme="light"] .donate-icon {
+      filter: brightness(0);
+    }
+
+    [data-theme="dark"] .donate-icon {
+      filter: brightness(0) invert(1);
+    }
+
     .card {
       background: var(--card);
-      border-radius: 16px;
-      padding: 2.5rem;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.05);
+      border-radius: 20px;
+      padding: 3rem;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.1);
       max-width: 480px;
       width: 100%;
       text-align: center;
       border: 1px solid var(--border);
       position: relative;
-      transition: background 0.3s ease, border 0.3s ease;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 600px;
     }
 
     h1 {
@@ -111,27 +146,55 @@
     }
 
     p.lead {
-      font-size: 1.1rem;
-      margin-bottom: 1.8rem;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--text);
+      opacity: 0.9;
+      line-height: 1.5;
+    }
+
+    .swipe-demo {
+      max-width: 65%;
+      height: auto;
+      margin: 2rem auto;
+      display: block;
+      transition: all 0.3s ease;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
+
+    .swipe-demo:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.25);
     }
 
     .steps {
       display: flex;
       flex-direction: column;
-      gap: 1.2rem;
+      gap: 1.4rem;
       text-align: left;
-      font-size: 0.98rem;
-      margin: 1.5rem 0;
+      font-size: 1rem;
+      margin: 2.5rem 0;
+      padding: 0 1rem;
     }
 
     .steps div {
       display: flex;
-      gap: 0.8rem;
+      gap: 1rem;
       align-items: center;
+      padding: 0.8rem 1.2rem;
+      background: rgba(128,128,128,0.1);
+      border-radius: 12px;
+      transition: transform 0.2s ease;
+    }
+
+    .steps div:hover {
+      transform: translateX(4px);
     }
 
     .steps div i {
-      font-size: 1.2rem;
+      font-size: 1.3rem;
+      opacity: 0.9;
     }
 
     .cta-button {
@@ -172,6 +235,92 @@
       text-align: center;
     }
 
+    .cards-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      width: 100%;
+      padding: 0 1rem;
+      margin: 0 auto;
+    }
+
+    .card {
+      flex: 1;
+      min-width: min(400px, 100%);
+      max-width: 480px;
+    }
+
+    .collab-section {
+      margin-top: 0;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .collab-logo {
+      height: 40px;
+      width: auto;
+    }
+
+    /* Switch Jorobean logo in dark mode */
+    [data-theme="dark"] .jorobean-logo {
+      content: url("jorobean_logoalt.svg");
+    }
+
+    /* Make Zellerfeld logo white in dark mode */
+    [data-theme="dark"] .zellerfeld-logo {
+      filter: brightness(0) invert(1);
+    }
+
+    .collab-x {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--text);
+    }
+
+    .wave-shoe {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 0.5rem;
+    }
+
+    .coming-soon {
+      font-size: 1.8rem;
+      margin: 0.5rem 0 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+    }
+
+    .stay-updated-button {
+      display: inline-block;
+      background-color: #b71111;
+      color: white;
+      padding: 0.9rem 1.6rem;
+      border: none;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.3s ease;
+    }
+
+    .stay-updated-button:hover {
+      background-color: #940d0d;
+    }
+
+    @media (min-width: 901px) {
+      .cards-container {
+        max-width: 1000px;
+      }
+    }
+
     @media (max-width: 500px) {
       .card {
         padding: 2rem 1.5rem;
@@ -188,27 +337,59 @@
 
   <div class="personal-header">
     <img src="iadden.jpg" alt="iAdden" class="profile-pic" />
-    <h2>Hi, I'm iAdden</h2>
-    <p>Built with love and caffeine ☕️</p>
+    <h2>Hi, I'm Kerry</h2>
+    <p>Powered by <span class="typing-text"></span></p>
+    <p>Check out some of my projects below</p>
     <div class="socials">
       <a href="https://instagram.com/iadden" target="_blank" aria-label="Instagram">
         <i class="fab fa-instagram"></i>
       </a>
+      <a href="https://coff.ee/iadden" target="_blank" aria-label="Buy me a coffee">
+        <img src="donateicon.svg" alt="Donate" class="donate-icon">
+      </a>
     </div>
   </div>
 
-  <div class="card">
-    <h1>SwipeClean Beta</h1>
-    <p class="lead">Tinder for your photos.<br/>Swipe left to delete, right to keep. Done.</p>
+  <div class="cards-container">
+    <div class="card">
+      <h1>SwipeClean Beta</h1>
+      <p class="lead">Tinder for your photos.<br/>Swipe left to delete, right to keep. Done.</p>
+      <a href="https://testflight.apple.com/join/hDVEmA4q" target="_blank">
+        <img src="swipe.svg" alt="SwipeClean Demo" class="swipe-demo">
+      </a>
 
-    <div class="steps">
-      <div><i>📲</i><span>Install <strong><a href="https://apps.apple.com/us/app/testflight/id899247664" target="_blank">TestFlight</a></strong> from the App Store</span></div>
-      <div><i>🚀</i><span>Tap below to join the beta on your iPhone</span></div>
-      <div><i>💡</i><span>Use it normally and send any feedback or bugs</span></div>
+      <div class="steps">
+        <div><i>📲</i><span>Tap to join the beta on your iPhone</span></div>
+        <div><i>💡</i><span>Use the app and send feedback</span></div>
+      </div>
+
+      <a href="https://testflight.apple.com/join/hDVEmA4q" target="_blank" class="cta-button">Join the Beta</a>
     </div>
 
-    <a href="https://testflight.apple.com/join/hDVEmA4q" target="_blank" class="cta-button">Join the Beta</a>
-    <div class="footer">Thanks for helping shape SwipeClean!</div>
+    <div class="card collab-section">
+      <div class="logo-container">
+        <a href="https://jorobean.com" target="_blank">
+          <img src="jorobean_logo.svg" alt="Jorobean" class="collab-logo jorobean-logo">
+        </a>
+        <span class="collab-x">×</span>
+        <a href="https://zellerfeld.com" target="_blank">
+          <img src="zellerfeld_logo.svg" alt="Zellerfeld" class="collab-logo zellerfeld-logo">
+        </a>
+      </div>
+      <p class="lead" style="margin: 0.5rem 0 0.5rem; font-style: italic; line-height: 1.7; opacity: 0.95;">My mom always said they'd make shoes for me. Now I make my own.<br><br>
+I've spent the past 5 years building Jorobean, and this partnership with Zellerfeld finally makes what I've been working toward possible. Their 3D printing tech means I can finally get my designs on more feet without the barriers of traditional shoe manufacturing.<br><br>
+WAVE, my first model, is almost here — and it's just the beginning.<br><br>
+<span style="font-weight: 600;">Wear The Love.</span></p>
+      <div style="display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;">
+        <div style="margin-top: 2rem">
+          <a href="https://jorobean.com" target="_blank">
+            <img src="wave2.svg" alt="Wave Shoe" class="wave-shoe" style="margin: 0 auto 0.5rem">
+          </a>
+          <h2 class="coming-soon" style="margin: 0">COMING SOON</h2>
+        </div>
+        <a href="https://Jorobean.com" target="_blank" class="stay-updated-button" style="margin-top: 3rem">Stay Updated</a>
+      </div>
+    </div>
   </div>
 
   <div class="footer">
@@ -216,10 +397,79 @@
   </div>
 
   <script>
+    const words = ['love', 'riddims', 'caffeine'];
+    let wordIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    let isWaiting = false;
+    const typingSpeed = 200;
+    const deletingSpeed = 120;
+    const wordDelay = 3000; // 3 second pause after word completes
+
+    function typeEffect() {
+      const typingElement = document.querySelector('.typing-text');
+      if (!typingElement) return;
+
+      const currentWord = words[wordIndex];
+
+      if (isWaiting) {
+        // Just wait, don't do anything
+        return;
+      }
+
+      if (isDeleting) {
+        // Deleting characters
+        typingElement.textContent = currentWord.substring(0, charIndex - 1);
+        charIndex--;
+        
+        if (charIndex === 0) {
+          // Finished deleting, move to next word
+          isDeleting = false;
+          wordIndex = (wordIndex + 1) % words.length;
+          setTimeout(typeEffect, typingSpeed);
+        } else {
+          setTimeout(typeEffect, deletingSpeed);
+        }
+      } else {
+        // Typing characters
+        typingElement.textContent = currentWord.substring(0, charIndex + 1);
+        charIndex++;
+        
+        if (charIndex === currentWord.length) {
+          // Finished typing the word, wait before deleting
+          isWaiting = true;
+          setTimeout(() => {
+            isWaiting = false;
+            isDeleting = true;
+            typeEffect();
+          }, wordDelay);
+        } else {
+          setTimeout(typeEffect, typingSpeed);
+        }
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
+      // Randomly swap card positions
+      const cardsContainer = document.querySelector('.cards-container');
+      const cards = Array.from(cardsContainer.children);
+      if (Math.random() > 0.5) {
+        cardsContainer.appendChild(cards[0]);
+      }
+
       const btn = document.getElementById('themeToggle');
-      const saved = localStorage.getItem('theme');
-      const defaultTheme = saved || 'dark';
+      
+      // Check if localStorage is available (won't work in Claude artifacts)
+      let defaultTheme = 'dark';
+      try {
+        const saved = localStorage.getItem('theme');
+        if (saved) defaultTheme = saved;
+      } catch (e) {
+        // localStorage not available, use default
+      }
+      
+      // Start the typing animation
+      typeEffect();
 
       document.documentElement.setAttribute('data-theme', defaultTheme);
       btn.textContent = defaultTheme === 'dark' ? '☀️' : '🌙';
@@ -228,7 +478,13 @@
         const currentTheme = document.documentElement.getAttribute('data-theme');
         const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
         document.documentElement.setAttribute('data-theme', newTheme);
-        localStorage.setItem('theme', newTheme);
+        
+        try {
+          localStorage.setItem('theme', newTheme);
+        } catch (e) {
+          // localStorage not available
+        }
+        
         btn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
       });
 

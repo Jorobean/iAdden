@@ -1,485 +1,291 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>iAdden</title>
-  
-  <!-- iOS homescreen icon -->
-  <link rel="apple-touch-icon" href="iadden.jpg">
-
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>STL Viewer</title>
   <style>
-    :root {
-      --bg: #121212;
-      --text: #f0f0f0;
-      --card: #1f1f1f;
-      --accent: #0a84ff;
-      --accent-hover: #0066cc;
-      --border: #333;
+    html,body { height:100%; margin:0; font-family: Inter, Roboto, Arial; background:#111; color:#eee; }
+    #app { height:100%; display:flex; flex-direction:column; }
+    header { display:flex; gap:12px; align-items:center; padding:10px 14px; background:linear-gradient(90deg, #0b0b0b, #131313); box-shadow:0 1px 0 rgba(255,255,255,0.02); z-index:10; }
+    header h1 { font-size:16px; margin:0; font-weight:600; color:#fff; letter-spacing:0.2px; }
+    #controls { margin-left:auto; display:flex; gap:8px; align-items:center; }
+    .btn, button { background:#1f1f1f; color:#fff; border:1px solid #2b2b2b; padding:8px 10px; border-radius:6px; cursor:pointer; font-size:13px; }
+    .btn:hover { background:#262626; }
+    #color { width:40px; height:34px; border-radius:6px; border:0; padding:0; cursor:pointer; }
+    #viewer { position:relative; flex:1; overflow:hidden; }
+    canvas { display:block; width:100%; height:100% }
+    #dropzone {
+      position:absolute; inset:20px; border:2px dashed rgba(255,255,255,0.06);
+      border-radius:12px; display:flex; align-items:center; justify-content:center;
+      pointer-events:none; transition:background .12s, border-color .12s;
+      background:linear-gradient(180deg, rgba(255,255,255,0.01), transparent);
+      color:rgba(255,255,255,0.6); font-size:14px; text-align:center; padding:18px;
     }
-
-    [data-theme="light"] {
-      --bg: #e6e6e6;
-      --text: #1a1a1a;
-      --card: #f3f4f6;
-      --accent: #007aff;
-      --accent-hover: #005ecb;
-      --border: #e0e0e0;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', 'Segoe UI', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem 1rem;
-      min-height: 100vh;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-
-    .profile-pic {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--border);
-      margin-bottom: 1rem;
-    }
-
-    .personal-header {
-      text-align: center;
-      max-width: 600px;
-      margin-bottom: 2rem;
-      opacity: 0.95;
-    }
-
-    .personal-header h2 {
-      margin: 0.2rem 0;
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-
-    .personal-header p {
-      margin: 0.2rem 0;
-      font-size: 0.95rem;
-      color: var(--text);
-    }
-
-    .typing-text {
-      border-right: 2px solid var(--text);
-      padding-right: 2px;
-      animation: blink 0.75s step-end infinite;
-    }
-
-    @keyframes blink {
-      from, to { border-color: transparent }
-      50% { border-color: var(--text) }
-    }
-
-    .socials {
-      margin-top: 0.6rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.6rem;
-    }
-
-    .socials a {
-      color: var(--text);
-      text-decoration: none;
-      font-size: 1.4rem;
-      transition: color 0.3s ease;
-      display: flex;
-      align-items: center;
-    }
-
-    .socials a:hover {
-      color: var(--accent);
-    }
-
-    .donate-icon {
-      width: 1.4rem;
-      height: 1.4rem;
-      transition: filter 0.3s ease;
-    }
-
-    /* Make donate icon black in light mode, white in dark mode */
-    [data-theme="light"] .donate-icon {
-      filter: brightness(0);
-    }
-
-    [data-theme="dark"] .donate-icon {
-      filter: brightness(0) invert(1);
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 20px;
-      padding: 3rem;
-      box-shadow: 0 12px 36px rgba(0,0,0,0.1);
-      max-width: 480px;
-      width: 100%;
-      text-align: center;
-      border: 1px solid var(--border);
-      position: relative;
-      transition: all 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 600px;
-    }
-
-    h1 {
-      font-size: 1.9rem;
-      margin: 0 0 0.5rem;
-    }
-
-    p.lead {
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-      color: var(--text);
-      opacity: 0.9;
-      line-height: 1.5;
-    }
-
-    .swipe-demo {
-      max-width: 65%;
-      height: auto;
-      margin: 2rem auto;
-      display: block;
-      transition: all 0.3s ease;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    }
-
-    .swipe-demo:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 28px rgba(0,0,0,0.25);
-    }
-
-    .steps {
-      display: flex;
-      flex-direction: column;
-      gap: 1.4rem;
-      text-align: left;
-      font-size: 1rem;
-      margin: 2.5rem 0;
-      padding: 0 1rem;
-    }
-
-    .steps div {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      padding: 0.8rem 1.2rem;
-      background: rgba(128,128,128,0.1);
-      border-radius: 12px;
-      transition: transform 0.2s ease;
-    }
-
-    .steps div:hover {
-      transform: translateX(4px);
-    }
-
-    .steps div i {
-      font-size: 1.3rem;
-      opacity: 0.9;
-    }
-
-    .cta-button {
-      display: inline-block;
-      background-color: var(--accent);
-      color: white;
-      padding: 0.9rem 1.6rem;
-      border: none;
-      border-radius: 999px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.3s ease;
-      margin-top: 1rem;
-    }
-
-    .cta-button:hover {
-      background-color: var(--accent-hover);
-    }
-
-    .toggle-theme {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      font-size: 1.4rem;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--text);
-      transition: color 0.3s ease;
-    }
-
-    .footer {
-      font-size: 0.8rem;
-      margin-top: 2rem;
-      color: #999;
-      text-align: center;
-    }
-
-    .cards-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 2rem;
-      width: 100%;
-      padding: 0 1rem;
-      margin: 0 auto;
-    }
-
-    .card {
-      flex: 1;
-      min-width: min(400px, 100%);
-      max-width: 480px;
-    }
-
-    .collab-section {
-      margin-top: 0;
-    }
-
-    .logo-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .collab-logo {
-      height: 32px;
-      width: auto;
-    }
-
-    /* Switch Jorobean logo in dark mode */
-    [data-theme="dark"] .jorobean-logo {
-      content: url("jorobean_logoalt.png");
-    }
-
-    /* Make Zellerfeld logo white in dark mode */
-    [data-theme="dark"] .zellerfeld-logo {
-      filter: brightness(0) invert(1);
-    }
-
-    .collab-x {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: var(--text);
-    }
-
-    .wave-shoe {
-      max-width: 100%;
-      height: auto;
-      margin-bottom: 0.5rem;
-    }
-
-    .trail-shoe {
-      max-width: 90%;
-      height: auto;
-      display: block;
-      margin: 0 auto 0.5rem;
-    }    .coming-soon {
-      font-size: 1.8rem;
-      margin: 0.5rem 0 1.5rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-    }
-
-    .stay-updated-button {
-      display: inline-block;
-      background-color: #b71111;
-      color: white;
-      padding: 0.9rem 1.6rem;
-      border: none;
-      border-radius: 999px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.3s ease;
-    }
-
-    .stay-updated-button:hover {
-      background-color: #940d0d;
-    }
-
-    @media (min-width: 901px) {
-      .cards-container {
-        max-width: 1000px;
-      }
-    }
-
-    @media (max-width: 500px) {
-      .card {
-        padding: 2rem 1.5rem;
-      }
-
-      h1 {
-        font-size: 1.6rem;
-      }
-    }
+    #dropzone.show { pointer-events:auto; }
+    #dropzone.hover { border-color: rgba(100,220,255,0.35); background: rgba(100,220,255,0.02); color:#bfeffd; }
+    #fileInput { display:none; }
+    .toolbar { display:flex; gap:8px; align-items:center; }
+    .small { padding:6px 8px; font-size:13px; }
+    .badge { background:#0b7bbf; color:white; padding:4px 8px; border-radius:999px; font-size:12px; }
+    #info { padding:10px 14px; font-size:13px; color:#ddd; background:#080808; border-top:1px solid rgba(255,255,255,0.02); }
+    .hidden { display:none; }
   </style>
 </head>
 <body>
-  <button class="toggle-theme" id="themeToggle" aria-label="Toggle theme">☀️</button>
+  <div id="app">
+    <header>
+      <h1>STL Viewer</h1>
+      <div id="controls" class="toolbar">
+        <label class="btn small" id="openBtn">Open STL</label>
+        <input id="fileInput" type="file" accept=".stl" />
+        <button class="btn small" id="fitBtn" title="Fit camera to object">Fit</button>
+        <button class="btn small" id="resetBtn" title="Reset scene">Reset</button>
+        <button class="btn small" id="wireBtn" title="Toggle wireframe">Wireframe</button>
+        <input id="color" type="color" value="#8ab4ff" title="Model color" />
+        <div class="badge" id="nameBadge">No model</div>
+      </div>
+    </header>
 
-  <div class="personal-header">
-    <img src="iadden.jpg" alt="iAdden" class="profile-pic" />
-    <h2>Hi, I'm Kerry</h2>
-    <p>Powered by <span class="typing-text"></span></p>
-    <p>Check out some of my projects below</p>
-    <div class="socials">
-      <a href="https://instagram.com/iadden" target="_blank" aria-label="Instagram">
-        <i class="fab fa-instagram"></i>
-      </a>
-      <a href="https://coff.ee/iadden" target="_blank" aria-label="Buy me a coffee">
-        <img src="donateicon.png" alt="Donate" class="donate-icon">
-      </a>
+    <div id="viewer">
+      <div id="dropzone" class="show">Drop an STL file here or click <span style="font-weight:600; margin:0 6px;">Open STL</span> to upload</div>
+      <!-- three.js will insert canvas here -->
+    </div>
+
+    <div id="info">
+      <span id="statsText">Drag & drop an .stl â supports ASCII & binary.</span>
     </div>
   </div>
 
-  <div class="cards-container">
-    <div class="card">
-      <h1>SwipeClean Beta</h1>
-      <p class="lead">Tinder for your photos.<br/>Swipe left to delete, right to keep. Done.</p>
-      <a href="https://testflight.apple.com/join/hDVEmA4q" target="_blank">
-        <img src="Swipe.png" alt="SwipeClean Demo" class="swipe-demo">
-      </a>
+  <!-- Use ES module imports for Three and add-ons -->
+  <script type="module">
+    import * as THREE from 'https://unpkg.com/three@0.152.2/build/three.module.js';
+    import { OrbitControls } from 'https://unpkg.com/three@0.152.2/examples/jsm/controls/OrbitControls.js';
+    import { STLLoader } from 'https://unpkg.com/three@0.152.2/examples/jsm/loaders/STLLoader.js';
 
-      <div class="steps">
-        <div><i>📲</i><span>Tap to join the beta on your iPhone</span></div>
-        <div><i>💡</i><span>Use the app and send feedback</span></div>
-      </div>
+    // Basic scene setup
+    const container = document.getElementById('viewer');
+    const dropzone = document.getElementById('dropzone');
+    const fileInput = document.getElementById('fileInput');
+    const openBtn = document.getElementById('openBtn');
+    const fitBtn = document.getElementById('fitBtn');
+    const resetBtn = document.getElementById('resetBtn');
+    const wireBtn = document.getElementById('wireBtn');
+    const colorPicker = document.getElementById('color');
+    const nameBadge = document.getElementById('nameBadge');
+    const statsText = document.getElementById('statsText');
 
-      <a href="https://testflight.apple.com/join/hDVEmA4q" target="_blank" class="cta-button">Join the Beta</a>
-    </div>
+    const scene = new THREE.Scene();
+    scene.background = new THREE.Color(0x0b0b0b);
 
-    <div class="card collab-section">
-      <div class="logo-container">
-        <a href="https://jorobean.com" target="_blank">
-          <img src="jorobean_logo.png" alt="Jorobean" class="collab-logo jorobean-logo">
-        </a>
-        <span class="collab-x">×</span>
-        <a href="https://zellerfeld.com" target="_blank">
-          <img src="zellerfeld_logo.png" alt="Zellerfeld" class="collab-logo zellerfeld-logo">
-        </a>
-      </div>
-      <p class="lead" style="margin: 0.5rem 0 0.5rem; font-style: italic; line-height: 1.7; opacity: 0.95;">My mom always said they'd make shoes for me. Now I make my own.<br><br>
-I've spent the past 5 years building Jorobean, and this partnership with Zellerfeld finally makes what I've been working toward possible. Their 3D printing tech means I can finally get my designs on more feet without the barriers of traditional shoe manufacturing.<br><br>
-TRAIL, my first model, is almost here — and it's just the beginning.<br><br>
-<span style="font-weight: 600;">Wear The Love.</span></p>
-      <div style="display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;">
-        <div style="margin-top: 2rem">
-          <a href="https://jorobean.com" target="_blank">
-            <img src="trail.png" alt="Trail Shoe" class="trail-shoe" style="margin: 0 auto 0.5rem">
-          </a>
-          <h2 class="coming-soon" style="margin: 0">COMING SOON</h2>
-        </div>
-        <a href="https://Jorobean.com" target="_blank" class="stay-updated-button" style="margin-top: 3rem">Stay Updated</a>
-      </div>
-    </div>
-  </div>
+    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
+    camera.position.set(0, 0.6, 1.8);
 
-  <div class="footer">
-    &copy; iAdden <span id="year"></span>
-  </div>
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setSize(container.clientWidth, container.clientHeight, false);
+    container.appendChild(renderer.domElement);
 
-  <script>
-    const words = ['love', 'riddims', 'caffeine'];
-    let wordIndex = 0;
-    let charIndex = 0;
-    let isDeleting = false;
-    let isWaiting = false;
-    const typingSpeed = 200;
-    const deletingSpeed = 120;
-    const wordDelay = 3000; // 3 second pause after word completes
+    // Lights
+    const hemi = new THREE.HemisphereLight(0xffffff, 0x222222, 0.6);
+    scene.add(hemi);
+    const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+    dir.position.set(5, 10, 7.5);
+    scene.add(dir);
 
-    function typeEffect() {
-      const typingElement = document.querySelector('.typing-text');
-      if (!typingElement) return;
+    // Helpers
+    const axes = new THREE.AxesHelper(0.4);
+    axes.material.depthTest = false;
+    axes.renderOrder = 2;
+    scene.add(axes);
 
-      const currentWord = words[wordIndex];
+    // Controls
+    const controls = new OrbitControls(camera, renderer.domElement);
+    controls.enableDamping = true;
+    controls.dampingFactor = 0.08;
+    controls.screenSpacePanning = false;
 
-      if (isWaiting) {
-        // Just wait, don't do anything
-        return;
-      }
+    // Loader and object container
+    const loader = new STLLoader();
+    let currentMesh = null;
+    let material = new THREE.MeshStandardMaterial({ color: colorPicker.value, metalness: 0.05, roughness: 0.5, flatShading: false });
 
-      if (isDeleting) {
-        // Deleting characters
-        typingElement.textContent = currentWord.substring(0, charIndex - 1);
-        charIndex--;
-        
-        if (charIndex === 0) {
-          // Finished deleting, move to next word
-          isDeleting = false;
-          wordIndex = (wordIndex + 1) % words.length;
-          setTimeout(typeEffect, typingSpeed);
-        } else {
-          setTimeout(typeEffect, deletingSpeed);
-        }
-      } else {
-        // Typing characters
-        typingElement.textContent = currentWord.substring(0, charIndex + 1);
-        charIndex++;
-        
-        if (charIndex === currentWord.length) {
-          // Finished typing the word, wait before deleting
-          isWaiting = true;
-          setTimeout(() => {
-            isWaiting = false;
-            isDeleting = true;
-            typeEffect();
-          }, wordDelay);
-        } else {
-          setTimeout(typeEffect, typingSpeed);
-        }
+    function clearModel() {
+      if (currentMesh) {
+        scene.remove(currentMesh);
+        currentMesh.geometry.dispose?.();
+        currentMesh.material?.dispose?.();
+        currentMesh = null;
+        nameBadge.textContent = "No model";
+        statsText.textContent = "Drag & drop an .stl â supports ASCII & binary.";
       }
     }
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('themeToggle');
-      
-      // Use default theme since localStorage isn't available in artifacts
-      let defaultTheme = 'dark';
-      
-      // Start the typing animation
-      typeEffect();
+    function putModelOnScene(geometry, filename) {
+      clearModel();
+      geometry.computeVertexNormals();
 
-      document.documentElement.setAttribute('data-theme', defaultTheme);
-      btn.textContent = defaultTheme === 'dark' ? '☀️' : '🌙';
-
-      btn.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        
-        btn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+      material = new THREE.MeshStandardMaterial({
+        color: colorPicker.value,
+        metalness: 0.05,
+        roughness: 0.5,
+        flatShading: false,
       });
 
-      const yearSpan = document.getElementById('year');
-      if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+      const mesh = new THREE.Mesh(geometry, material);
+      // If geometry is huge or tiny, scale it reasonably
+      // We'll fit camera afterwards.
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+
+      currentMesh = mesh;
+      scene.add(mesh);
+      nameBadge.textContent = filename || "model";
+      statsText.textContent = `Vertices: ${geometry.attributes.position.count.toLocaleString()}`;
+      fitCameraToObject(mesh, camera, controls);
+    }
+
+    // Fit camera to object helper
+    function fitCameraToObject(object, camera, controls, offset = 1.25) {
+      const box = new THREE.Box3().setFromObject(object);
+      const size = box.getSize(new THREE.Vector3());
+      const center = box.getCenter(new THREE.Vector3());
+
+      // compute a distance that fits the object in camera frustum
+      const maxSize = Math.max(size.x, size.y, size.z);
+      const fitHeightDistance = maxSize / (2 * Math.atan(Math.PI * camera.fov / 360));
+      const fitWidthDistance = fitHeightDistance / camera.aspect;
+      const distance = offset * Math.max(fitHeightDistance, fitWidthDistance);
+
+      const direction = controls.target.clone()
+        .sub(camera.position)
+        .normalize()
+        .multiplyScalar(-1);
+
+      camera.near = distance / 100;
+      camera.far = distance * 100;
+      camera.updateProjectionMatrix();
+
+      camera.position.copy(center);
+      camera.position.x += distance * 0.5;
+      camera.position.y += distance * 0.25;
+      camera.position.z += distance;
+      camera.lookAt(center);
+
+      controls.target.copy(center);
+      controls.update();
+    }
+
+    // File handling
+    async function handleFile(file) {
+      if (!file) return;
+      nameBadge.textContent = "Loading...";
+      const filename = file.name || "model.stl";
+      try {
+        // Read as ArrayBuffer (STLLoader.parse supports buffer or string)
+        const buffer = await file.arrayBuffer();
+        // If the file is ASCII, parse accepts string - but parse tries to auto-detect.
+        const geometry = loader.parse(buffer);
+        // Many STLs may come with huge coordinates; center geometry
+        geometry.computeBoundingBox();
+        const bb = geometry.boundingBox;
+        const center = new THREE.Vector3();
+        bb.getCenter(center);
+        // translate geometry to center
+        geometry.translate(-center.x, -center.y, -center.z);
+        putModelOnScene(geometry, filename);
+      } catch (err) {
+        console.error(err);
+        nameBadge.textContent = "Load error";
+        statsText.textContent = "Error loading file. Make sure it's a valid STL (ASCII or binary).";
+        alert("Failed to load STL: " + (err && err.message ? err.message : err));
+      }
+    }
+
+    // Drag & drop
+    ;['dragenter','dragover'].forEach(ev => {
+      window.addEventListener(ev, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.add('hover');
+        dropzone.classList.add('show');
+      }, false);
     });
+    ;['dragleave','drop'].forEach(ev => {
+      window.addEventListener(ev, (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        dropzone.classList.remove('hover');
+      }, false);
+    });
+    window.addEventListener('drop', (e) => {
+      const dt = e.dataTransfer;
+      if (!dt) return;
+      const files = dt.files;
+      if (files && files.length) handleFile(files[0]);
+    }, false);
+
+    // File input
+    openBtn.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', (e) => {
+      const f = e.target.files && e.target.files[0];
+      if (f) handleFile(f);
+      // reset input so same file can be picked again
+      fileInput.value = '';
+    });
+
+    // Buttons
+    fitBtn.addEventListener('click', () => { if (currentMesh) fitCameraToObject(currentMesh, camera, controls); });
+    resetBtn.addEventListener('click', () => {
+      clearModel();
+      camera.position.set(0, 0.6, 1.8);
+      camera.near = 0.1;
+      camera.far = 1000;
+      camera.updateProjectionMatrix();
+      controls.target.set(0,0,0);
+      controls.update();
+    });
+    wireBtn.addEventListener('click', () => {
+      if (!currentMesh) return;
+      currentMesh.material.wireframe = !currentMesh.material.wireframe;
+      wireBtn.textContent = currentMesh.material.wireframe ? "Solid" : "Wireframe";
+    });
+    colorPicker.addEventListener('input', (e) => {
+      if (!currentMesh) return;
+      currentMesh.material.color.set(colorPicker.value);
+    });
+
+    // Resize handler
+    window.addEventListener('resize', onWindowResize);
+    function onWindowResize() {
+      camera.aspect = container.clientWidth / container.clientHeight;
+      camera.updateProjectionMatrix();
+      renderer.setSize(container.clientWidth, container.clientHeight, false);
+    }
+
+    // Animation loop
+    function animate() {
+      requestAnimationFrame(animate);
+      controls.update();
+      renderer.render(scene, camera);
+    }
+    animate();
+
+    // Small UX: double-click canvas to toggle fullscreen
+    renderer.domElement.addEventListener('dblclick', async () => {
+      try {
+        if (!document.fullscreenElement) await container.requestFullscreen();
+        else await document.exitFullscreen();
+      } catch (err) { /* ignore */ }
+    });
+
+    // Prevent accidental navigation when dragging a file
+    window.addEventListener('dragover', (e)=>e.preventDefault());
+    window.addEventListener('drop', (e)=>e.preventDefault());
+
+    // Optional: sample model loader by URL (uncomment to test with a remote STL)
+    // fetch('path/to/sample.stl').then(r=>r.arrayBuffer()).then(buf=>{ const g = loader.parse(buf); putModelOnScene(g,'sample.stl') });
+
   </script>
 </body>
 </html>

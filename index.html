@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>STL Viewer</title>
   <style>
-    html,body { height:100%; margin:0; font-family: Inter, Roboto, Arial; background:#111; color:#eee; }
+    html, body { height:100%; margin:0; font-family: Inter, Roboto, Arial; background:#111; color:#eee; }
     #app { height:100%; display:flex; flex-direction:column; }
     header { display:flex; gap:12px; align-items:center; padding:10px 14px; background:linear-gradient(90deg, #0b0b0b, #131313); box-shadow:0 1px 0 rgba(255,255,255,0.02); z-index:10; }
     header h1 { font-size:16px; margin:0; font-weight:600; color:#fff; letter-spacing:0.2px; }
@@ -49,243 +49,158 @@
 
     <div id="viewer">
       <div id="dropzone" class="show">Drop an STL file here or click <span style="font-weight:600; margin:0 6px;">Open STL</span> to upload</div>
-      <!-- three.js will insert canvas here -->
     </div>
 
     <div id="info">
-      <span id="statsText">Drag & drop an .stl â supports ASCII & binary.</span>
+      <span id="statsText">Drag & drop an .stl — supports ASCII & binary.</span>
     </div>
   </div>
 
-  <!-- Use ES module imports for Three and add-ons -->
+  <!-- Three.js & STLLoader using jsDelivr -->
   <script type="module">
-    import * as THREE from 'https://unpkg.com/three@0.152.2/build/three.module.js';
-    import { OrbitControls } from 'https://unpkg.com/three@0.152.2/examples/jsm/controls/OrbitControls.js';
-    import { STLLoader } from 'https://unpkg.com/three@0.152.2/examples/jsm/loaders/STLLoader.js';
+    import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js';
+    import { OrbitControls } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/controls/OrbitControls.js';
+    import { STLLoader } from 'https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/STLLoader.js';
 
-    // Basic scene setup
-    const container = document.getElementById('viewer');
-    const dropzone = document.getElementById('dropzone');
-    const fileInput = document.getElementById('fileInput');
-    const openBtn = document.getElementById('openBtn');
-    const fitBtn = document.getElementById('fitBtn');
-    const resetBtn = document.getElementById('resetBtn');
-    const wireBtn = document.getElementById('wireBtn');
-    const colorPicker = document.getElementById('color');
-    const nameBadge = document.getElementById('nameBadge');
-    const statsText = document.getElementById('statsText');
+    document.addEventListener('DOMContentLoaded', () => {
+      const container = document.getElementById('viewer');
+      const dropzone = document.getElementById('dropzone');
+      const fileInput = document.getElementById('fileInput');
+      const openBtn = document.getElementById('openBtn');
+      const fitBtn = document.getElementById('fitBtn');
+      const resetBtn = document.getElementById('resetBtn');
+      const wireBtn = document.getElementById('wireBtn');
+      const colorPicker = document.getElementById('color');
+      const nameBadge = document.getElementById('nameBadge');
+      const statsText = document.getElementById('statsText');
 
-    const scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x0b0b0b);
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color(0x0b0b0b);
 
-    const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-    camera.position.set(0, 0.6, 1.8);
-
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.setSize(container.clientWidth, container.clientHeight, false);
-    container.appendChild(renderer.domElement);
-
-    // Lights
-    const hemi = new THREE.HemisphereLight(0xffffff, 0x222222, 0.6);
-    scene.add(hemi);
-    const dir = new THREE.DirectionalLight(0xffffff, 0.9);
-    dir.position.set(5, 10, 7.5);
-    scene.add(dir);
-
-    // Helpers
-    const axes = new THREE.AxesHelper(0.4);
-    axes.material.depthTest = false;
-    axes.renderOrder = 2;
-    scene.add(axes);
-
-    // Controls
-    const controls = new OrbitControls(camera, renderer.domElement);
-    controls.enableDamping = true;
-    controls.dampingFactor = 0.08;
-    controls.screenSpacePanning = false;
-
-    // Loader and object container
-    const loader = new STLLoader();
-    let currentMesh = null;
-    let material = new THREE.MeshStandardMaterial({ color: colorPicker.value, metalness: 0.05, roughness: 0.5, flatShading: false });
-
-    function clearModel() {
-      if (currentMesh) {
-        scene.remove(currentMesh);
-        currentMesh.geometry.dispose?.();
-        currentMesh.material?.dispose?.();
-        currentMesh = null;
-        nameBadge.textContent = "No model";
-        statsText.textContent = "Drag & drop an .stl â supports ASCII & binary.";
-      }
-    }
-
-    function putModelOnScene(geometry, filename) {
-      clearModel();
-      geometry.computeVertexNormals();
-
-      material = new THREE.MeshStandardMaterial({
-        color: colorPicker.value,
-        metalness: 0.05,
-        roughness: 0.5,
-        flatShading: false,
-      });
-
-      const mesh = new THREE.Mesh(geometry, material);
-      // If geometry is huge or tiny, scale it reasonably
-      // We'll fit camera afterwards.
-      mesh.castShadow = true;
-      mesh.receiveShadow = true;
-
-      currentMesh = mesh;
-      scene.add(mesh);
-      nameBadge.textContent = filename || "model";
-      statsText.textContent = `Vertices: ${geometry.attributes.position.count.toLocaleString()}`;
-      fitCameraToObject(mesh, camera, controls);
-    }
-
-    // Fit camera to object helper
-    function fitCameraToObject(object, camera, controls, offset = 1.25) {
-      const box = new THREE.Box3().setFromObject(object);
-      const size = box.getSize(new THREE.Vector3());
-      const center = box.getCenter(new THREE.Vector3());
-
-      // compute a distance that fits the object in camera frustum
-      const maxSize = Math.max(size.x, size.y, size.z);
-      const fitHeightDistance = maxSize / (2 * Math.atan(Math.PI * camera.fov / 360));
-      const fitWidthDistance = fitHeightDistance / camera.aspect;
-      const distance = offset * Math.max(fitHeightDistance, fitWidthDistance);
-
-      const direction = controls.target.clone()
-        .sub(camera.position)
-        .normalize()
-        .multiplyScalar(-1);
-
-      camera.near = distance / 100;
-      camera.far = distance * 100;
-      camera.updateProjectionMatrix();
-
-      camera.position.copy(center);
-      camera.position.x += distance * 0.5;
-      camera.position.y += distance * 0.25;
-      camera.position.z += distance;
-      camera.lookAt(center);
-
-      controls.target.copy(center);
-      controls.update();
-    }
-
-    // File handling
-    async function handleFile(file) {
-      if (!file) return;
-      nameBadge.textContent = "Loading...";
-      const filename = file.name || "model.stl";
-      try {
-        // Read as ArrayBuffer (STLLoader.parse supports buffer or string)
-        const buffer = await file.arrayBuffer();
-        // If the file is ASCII, parse accepts string - but parse tries to auto-detect.
-        const geometry = loader.parse(buffer);
-        // Many STLs may come with huge coordinates; center geometry
-        geometry.computeBoundingBox();
-        const bb = geometry.boundingBox;
-        const center = new THREE.Vector3();
-        bb.getCenter(center);
-        // translate geometry to center
-        geometry.translate(-center.x, -center.y, -center.z);
-        putModelOnScene(geometry, filename);
-      } catch (err) {
-        console.error(err);
-        nameBadge.textContent = "Load error";
-        statsText.textContent = "Error loading file. Make sure it's a valid STL (ASCII or binary).";
-        alert("Failed to load STL: " + (err && err.message ? err.message : err));
-      }
-    }
-
-    // Drag & drop
-    ;['dragenter','dragover'].forEach(ev => {
-      window.addEventListener(ev, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dropzone.classList.add('hover');
-        dropzone.classList.add('show');
-      }, false);
-    });
-    ;['dragleave','drop'].forEach(ev => {
-      window.addEventListener(ev, (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        dropzone.classList.remove('hover');
-      }, false);
-    });
-    window.addEventListener('drop', (e) => {
-      const dt = e.dataTransfer;
-      if (!dt) return;
-      const files = dt.files;
-      if (files && files.length) handleFile(files[0]);
-    }, false);
-
-    // File input
-    openBtn.addEventListener('click', () => fileInput.click());
-    fileInput.addEventListener('change', (e) => {
-      const f = e.target.files && e.target.files[0];
-      if (f) handleFile(f);
-      // reset input so same file can be picked again
-      fileInput.value = '';
-    });
-
-    // Buttons
-    fitBtn.addEventListener('click', () => { if (currentMesh) fitCameraToObject(currentMesh, camera, controls); });
-    resetBtn.addEventListener('click', () => {
-      clearModel();
+      const camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
       camera.position.set(0, 0.6, 1.8);
-      camera.near = 0.1;
-      camera.far = 1000;
-      camera.updateProjectionMatrix();
-      controls.target.set(0,0,0);
-      controls.update();
-    });
-    wireBtn.addEventListener('click', () => {
-      if (!currentMesh) return;
-      currentMesh.material.wireframe = !currentMesh.material.wireframe;
-      wireBtn.textContent = currentMesh.material.wireframe ? "Solid" : "Wireframe";
-    });
-    colorPicker.addEventListener('input', (e) => {
-      if (!currentMesh) return;
-      currentMesh.material.color.set(colorPicker.value);
-    });
 
-    // Resize handler
-    window.addEventListener('resize', onWindowResize);
-    function onWindowResize() {
-      camera.aspect = container.clientWidth / container.clientHeight;
-      camera.updateProjectionMatrix();
+      const renderer = new THREE.WebGLRenderer({ antialias: true });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
       renderer.setSize(container.clientWidth, container.clientHeight, false);
-    }
+      container.appendChild(renderer.domElement);
 
-    // Animation loop
-    function animate() {
-      requestAnimationFrame(animate);
-      controls.update();
-      renderer.render(scene, camera);
-    }
-    animate();
+      const hemi = new THREE.HemisphereLight(0xffffff, 0x222222, 0.6);
+      scene.add(hemi);
+      const dir = new THREE.DirectionalLight(0xffffff, 0.9);
+      dir.position.set(5, 10, 7.5);
+      scene.add(dir);
 
-    // Small UX: double-click canvas to toggle fullscreen
-    renderer.domElement.addEventListener('dblclick', async () => {
-      try {
-        if (!document.fullscreenElement) await container.requestFullscreen();
-        else await document.exitFullscreen();
-      } catch (err) { /* ignore */ }
+      const axes = new THREE.AxesHelper(0.4);
+      axes.material.depthTest = false;
+      axes.renderOrder = 2;
+      scene.add(axes);
+
+      const controls = new OrbitControls(camera, renderer.domElement);
+      controls.enableDamping = true;
+      controls.dampingFactor = 0.08;
+      controls.screenSpacePanning = false;
+
+      const loader = new STLLoader();
+      let currentMesh = null;
+      let material = new THREE.MeshStandardMaterial({ color: colorPicker.value, metalness: 0.05, roughness: 0.5 });
+
+      function clearModel() {
+        if (currentMesh) {
+          scene.remove(currentMesh);
+          currentMesh.geometry.dispose?.();
+          currentMesh.material?.dispose?.();
+          currentMesh = null;
+          nameBadge.textContent = "No model";
+          statsText.textContent = "Drag & drop an .stl — supports ASCII & binary.";
+        }
+      }
+
+      function putModelOnScene(geometry, filename) {
+        clearModel();
+        geometry.computeVertexNormals();
+        material = new THREE.MeshStandardMaterial({ color: colorPicker.value, metalness: 0.05, roughness: 0.5 });
+        const mesh = new THREE.Mesh(geometry, material);
+        mesh.castShadow = true;
+        mesh.receiveShadow = true;
+        currentMesh = mesh;
+        scene.add(mesh);
+        nameBadge.textContent = filename || "model";
+        statsText.textContent = `Vertices: ${geometry.attributes.position.count.toLocaleString()}`;
+        fitCameraToObject(mesh, camera, controls);
+      }
+
+      function fitCameraToObject(object, camera, controls, offset = 1.25) {
+        const box = new THREE.Box3().setFromObject(object);
+        const size = box.getSize(new THREE.Vector3());
+        const center = box.getCenter(new THREE.Vector3());
+        const maxSize = Math.max(size.x, size.y, size.z);
+        const fitHeightDistance = maxSize / (2 * Math.atan(Math.PI * camera.fov / 360));
+        const fitWidthDistance = fitHeightDistance / camera.aspect;
+        const distance = offset * Math.max(fitHeightDistance, fitWidthDistance);
+        camera.near = distance / 100;
+        camera.far = distance * 100;
+        camera.updateProjectionMatrix();
+        camera.position.copy(center);
+        camera.position.x += distance * 0.5;
+        camera.position.y += distance * 0.25;
+        camera.position.z += distance;
+        camera.lookAt(center);
+        controls.target.copy(center);
+        controls.update();
+      }
+
+      async function handleFile(file) {
+        if (!file) return;
+        nameBadge.textContent = "Loading...";
+        const filename = file.name || "model.stl";
+        try {
+          const buffer = await file.arrayBuffer();
+          const geometry = loader.parse(buffer);
+          geometry.computeBoundingBox();
+          const bb = geometry.boundingBox;
+          const center = new THREE.Vector3();
+          bb.getCenter(center);
+          geometry.translate(-center.x, -center.y, -center.z);
+          putModelOnScene(geometry, filename);
+        } catch (err) {
+          console.error(err);
+          nameBadge.textContent = "Load error";
+          statsText.textContent = "Error loading file. Make sure it's a valid STL (ASCII or binary).";
+          alert("Failed to load STL: " + (err && err.message ? err.message : err));
+        }
+      }
+
+      ['dragenter','dragover'].forEach(ev => {
+        window.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); dropzone.classList.add('hover'); dropzone.classList.add('show'); }, false);
+      });
+      ['dragleave','drop'].forEach(ev => {
+        window.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); dropzone.classList.remove('hover'); }, false);
+      });
+      window.addEventListener('drop', e => {
+        const dt = e.dataTransfer;
+        if (!dt) return;
+        const files = dt.files;
+        if (files && files.length) handleFile(files[0]);
+      }, false);
+
+      openBtn.addEventListener('click', () => fileInput.click());
+      fileInput.addEventListener('change', e => { const f = e.target.files && e.target.files[0]; if (f) handleFile(f); fileInput.value = ''; });
+
+      fitBtn.addEventListener('click', () => { if (currentMesh) fitCameraToObject(currentMesh, camera, controls); });
+      resetBtn.addEventListener('click', () => { clearModel(); camera.position.set(0, 0.6, 1.8); camera.near = 0.1; camera.far = 1000; camera.updateProjectionMatrix(); controls.target.set(0,0,0); controls.update(); });
+      wireBtn.addEventListener('click', () => { if (!currentMesh) return; currentMesh.material.wireframe = !currentMesh.material.wireframe; wireBtn.textContent = currentMesh.material.wireframe ? "Solid" : "Wireframe"; });
+      colorPicker.addEventListener('input', () => { if (!currentMesh) return; currentMesh.material.color.set(colorPicker.value); });
+
+      window.addEventListener('resize', () => { camera.aspect = container.clientWidth / container.clientHeight; camera.updateProjectionMatrix(); renderer.setSize(container.clientWidth, container.clientHeight, false); });
+
+      function animate() { requestAnimationFrame(animate); controls.update(); renderer.render(scene, camera); }
+      animate();
+
+      renderer.domElement.addEventListener('dblclick', async () => { try { if (!document.fullscreenElement) await container.requestFullscreen(); else await document.exitFullscreen(); } catch {} });
+      window.addEventListener('dragover', e => e.preventDefault());
+      window.addEventListener('drop', e => e.preventDefault());
     });
-
-    // Prevent accidental navigation when dragging a file
-    window.addEventListener('dragover', (e)=>e.preventDefault());
-    window.addEventListener('drop', (e)=>e.preventDefault());
-
-    // Optional: sample model loader by URL (uncomment to test with a remote STL)
-    // fetch('path/to/sample.stl').then(r=>r.arrayBuffer()).then(buf=>{ const g = loader.parse(buf); putModelOnScene(g,'sample.stl') });
-
   </script>
 </body>
-</html>
+</html></html>

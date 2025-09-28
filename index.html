@@ -1,485 +1,621 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>iAdden</title>
-  
-  <!-- iOS homescreen icon -->
-  <link rel="apple-touch-icon" href="iadden.jpg">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Browser with Webcam</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <style>
+        html, body { 
+            height: 100%; 
+            margin: 0; 
+            font-family: Arial, sans-serif; 
+            background: #111; 
+            color: #fff; 
+        }
+        #app { 
+            height: 100%; 
+            display: flex; 
+            flex-direction: column; 
+        }
+        .nav-bar {
+            padding: 15px;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.6));
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 15px;
+            align-items: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        .btn {
+            padding: 12px 20px;
+            background: rgba(68, 68, 68, 0.8);
+            color: white;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            backdrop-filter: blur(5px);
+            font-size: 14px;
+            transition: all 0.2s ease;
+            min-width: 100px;
+            text-align: center;
+            white-space: nowrap;
+        }
+        .icon-btn {
+            min-width: 45px;
+            width: 45px;
+            height: 45px;
+            padding: 0;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+        }
+        .icon-btn i {
+            transition: transform 0.2s ease;
+        }
+        .icon-btn:hover i {
+            transform: scale(1.2);
+        }
+        .icon-btn.active {
+            background: #4CAF50;
+            box-shadow: 0 0 10px rgba(76, 175, 80, 0.5);
+        }
+        .btn:hover {
+            background: rgba(85, 85, 85, 0.9);
+            transform: translateY(-2px);
+        }
+        .btn:active {
+            transform: translateY(0px);
+        }
+        .main-content {
+            display: flex;
+            flex: 1;
+            min-height: 0;
+        }
+        .webpage {
+            flex: 1;
+            height: 100%;
+            border: none;
+        }
+        .webcam-container {
+            width: 100%;
+            height: 100vh;
+            background: #111;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        .webcam-container.pip {
+            position: fixed;
+            width: 200px;
+            resize: both;
+            overflow: hidden;
+            min-width: 160px;
+            min-height: 120px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            z-index: 1000;
+            background: #222;
+            padding: 10px;
+        }
+        .webcam-container.pip .status {
+            font-size: 12px;
+            padding: 2px;
+        }
+        .webcam-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: move;
+            padding: 5px;
+            background: rgba(0,0,0,0.2);
+            border-radius: 4px;
+        }
+        .pip-controls {
+            display: flex;
+            gap: 5px;
+        }
+        .center-controls {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            justify-content: center;
+        }
+        
+        .right-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            justify-content: flex-end;
+        }
+        .btn.active {
+            background: #4CAF50;
+        }
+        #recordBtn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        #recordBtn.recording {
+            background: #dc3545;
+            animation: pulse 2s infinite;
+        }
+        .pip-options {
+            display: flex;
+            gap: 5px;
+            margin-top: 5px;
+        }
+        /* Hide native PiP button */
+        video::-webkit-media-controls-pip-button {
+            display: none;
+        }
+        #webcam {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            background: #111;
+            transform: scaleX(-1); /* Flips the video horizontally */
+            -webkit-transform: scaleX(-1); /* For Safari compatibility */
+        }
+        /* Mirror effect for PiP window */
+        video:picture-in-picture {
+            transform: scaleX(-1);
+            -webkit-transform: scaleX(-1);
+        }
+        .status {
+            padding: 15px;
+            text-align: center;
+            font-size: 16px;
+            color: #fff;
+            background: rgba(0, 0, 0, 0.7);
+            border-radius: 10px;
+            margin: 20px auto;
+            max-width: 300px;
+            line-height: 1.5;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+        .recording-indicator {
+            display: none;
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #dc3545;
+            color: white;
+            padding: 12px 30px;
+            border-radius: 50px;
+            animation: pulse 1.5s infinite;
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+            font-weight: bold;
+            font-size: 20px;
+            border: 2px solid rgba(255,255,255,0.5);
+            box-shadow: 0 4px 20px rgba(220, 53, 69, 0.5);
+            text-shadow: 0 2px 4px rgba(0,0,0,0.5);
+            z-index: 1001;
+            letter-spacing: 0.5px;
+        }
+        
+        body.recording .recording-indicator {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        @keyframes pulse {
+            0% { 
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+            }
+            50% { 
+                opacity: 0.8;
+                transform: translateX(-50%) scale(1.05);
+            }
+            100% { 
+                opacity: 1;
+                transform: translateX(-50%) scale(1);
+            }
+        }
+        .recording .recording-indicator {
+            display: block;
+        }
+        #recordBtn {
+            background: #dc3545;
+        }
+        #recordBtn.recording {
+            background: #28a745;
+        }
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
-
-  <!-- Font Awesome -->
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
-
-  <style>
-    :root {
-      --bg: #121212;
-      --text: #f0f0f0;
-      --card: #1f1f1f;
-      --accent: #0a84ff;
-      --accent-hover: #0066cc;
-      --border: #333;
-    }
-
-    [data-theme="light"] {
-      --bg: #e6e6e6;
-      --text: #1a1a1a;
-      --card: #f3f4f6;
-      --accent: #007aff;
-      --accent-hover: #005ecb;
-      --border: #e0e0e0;
-    }
-
-    * {
-      box-sizing: border-box;
-    }
-
-    body {
-      margin: 0;
-      background-color: var(--bg);
-      color: var(--text);
-      font-family: 'Inter', 'Segoe UI', sans-serif;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 2rem 1rem;
-      min-height: 100vh;
-      transition: background 0.3s ease, color 0.3s ease;
-    }
-
-    .profile-pic {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 3px solid var(--border);
-      margin-bottom: 1rem;
-    }
-
-    .personal-header {
-      text-align: center;
-      max-width: 600px;
-      margin-bottom: 2rem;
-      opacity: 0.95;
-    }
-
-    .personal-header h2 {
-      margin: 0.2rem 0;
-      font-size: 1.25rem;
-      font-weight: 600;
-    }
-
-    .personal-header p {
-      margin: 0.2rem 0;
-      font-size: 0.95rem;
-      color: var(--text);
-    }
-
-    .typing-text {
-      border-right: 2px solid var(--text);
-      padding-right: 2px;
-      animation: blink 0.75s step-end infinite;
-    }
-
-    @keyframes blink {
-      from, to { border-color: transparent }
-      50% { border-color: var(--text) }
-    }
-
-    .socials {
-      margin-top: 0.6rem;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.6rem;
-    }
-
-    .socials a {
-      color: var(--text);
-      text-decoration: none;
-      font-size: 1.4rem;
-      transition: color 0.3s ease;
-      display: flex;
-      align-items: center;
-    }
-
-    .socials a:hover {
-      color: var(--accent);
-    }
-
-    .donate-icon {
-      width: 1.4rem;
-      height: 1.4rem;
-      transition: filter 0.3s ease;
-    }
-
-    /* Make donate icon black in light mode, white in dark mode */
-    [data-theme="light"] .donate-icon {
-      filter: brightness(0);
-    }
-
-    [data-theme="dark"] .donate-icon {
-      filter: brightness(0) invert(1);
-    }
-
-    .card {
-      background: var(--card);
-      border-radius: 20px;
-      padding: 3rem;
-      box-shadow: 0 12px 36px rgba(0,0,0,0.1);
-      max-width: 480px;
-      width: 100%;
-      text-align: center;
-      border: 1px solid var(--border);
-      position: relative;
-      transition: all 0.3s ease;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      min-height: 600px;
-    }
-
-    h1 {
-      font-size: 1.9rem;
-      margin: 0 0 0.5rem;
-    }
-
-    p.lead {
-      font-size: 1.2rem;
-      margin-bottom: 1rem;
-      color: var(--text);
-      opacity: 0.9;
-      line-height: 1.5;
-    }
-
-    .swipe-demo {
-      max-width: 65%;
-      height: auto;
-      margin: 2rem auto;
-      display: block;
-      transition: all 0.3s ease;
-      border-radius: 12px;
-      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
-    }
-
-    .swipe-demo:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 12px 28px rgba(0,0,0,0.25);
-    }
-
-    .steps {
-      display: flex;
-      flex-direction: column;
-      gap: 1.4rem;
-      text-align: left;
-      font-size: 1rem;
-      margin: 2.5rem 0;
-      padding: 0 1rem;
-    }
-
-    .steps div {
-      display: flex;
-      gap: 1rem;
-      align-items: center;
-      padding: 0.8rem 1.2rem;
-      background: rgba(128,128,128,0.1);
-      border-radius: 12px;
-      transition: transform 0.2s ease;
-    }
-
-    .steps div:hover {
-      transform: translateX(4px);
-    }
-
-    .steps div i {
-      font-size: 1.3rem;
-      opacity: 0.9;
-    }
-
-    .cta-button {
-      display: inline-block;
-      background-color: var(--accent);
-      color: white;
-      padding: 0.9rem 1.6rem;
-      border: none;
-      border-radius: 999px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.3s ease;
-      margin-top: 1rem;
-    }
-
-    .cta-button:hover {
-      background-color: var(--accent-hover);
-    }
-
-    .toggle-theme {
-      position: absolute;
-      top: 1rem;
-      right: 1rem;
-      font-size: 1.4rem;
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--text);
-      transition: color 0.3s ease;
-    }
-
-    .footer {
-      font-size: 0.8rem;
-      margin-top: 2rem;
-      color: #999;
-      text-align: center;
-    }
-
-    .cards-container {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 2rem;
-      width: 100%;
-      padding: 0 1rem;
-      margin: 0 auto;
-    }
-
-    .card {
-      flex: 1;
-      min-width: min(400px, 100%);
-      max-width: 480px;
-    }
-
-    .collab-section {
-      margin-top: 0;
-    }
-
-    .logo-container {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 1.5rem;
-      margin-bottom: 2rem;
-    }
-
-    .collab-logo {
-      height: 32px;
-      width: auto;
-    }
-
-    /* Switch Jorobean logo in dark mode */
-    [data-theme="dark"] .jorobean-logo {
-      content: url("jorobean_logoalt.png");
-    }
-
-    /* Make Zellerfeld logo white in dark mode */
-    [data-theme="dark"] .zellerfeld-logo {
-      filter: brightness(0) invert(1);
-    }
-
-    .collab-x {
-      font-size: 1.5rem;
-      font-weight: bold;
-      color: var(--text);
-    }
-
-    .wave-shoe {
-      max-width: 100%;
-      height: auto;
-      margin-bottom: 0.5rem;
-    }
-
-    .trail-shoe {
-      max-width: 90%;
-      height: auto;
-      display: block;
-      margin: 0 auto 0.5rem;
-    }    .coming-soon {
-      font-size: 1.8rem;
-      margin: 0.5rem 0 1.5rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-    }
-
-    .stay-updated-button {
-      display: inline-block;
-      background-color: #b71111;
-      color: white;
-      padding: 0.9rem 1.6rem;
-      border: none;
-      border-radius: 999px;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      text-decoration: none;
-      transition: background 0.3s ease;
-    }
-
-    .stay-updated-button:hover {
-      background-color: #940d0d;
-    }
-
-    @media (min-width: 901px) {
-      .cards-container {
-        max-width: 1000px;
-      }
-    }
-
-    @media (max-width: 500px) {
-      .card {
-        padding: 2rem 1.5rem;
-      }
-
-      h1 {
-        font-size: 1.6rem;
-      }
-    }
-  </style>
+    </style>
 </head>
 <body>
-  <button class="toggle-theme" id="themeToggle" aria-label="Toggle theme">☀️</button>
-
-  <div class="personal-header">
-    <img src="iadden.jpg" alt="iAdden" class="profile-pic" />
-    <h2>Hi, I'm Kerry</h2>
-    <p>Powered by <span class="typing-text"></span></p>
-    <p>Check out some of my projects below</p>
-    <div class="socials">
-      <a href="https://instagram.com/iadden" target="_blank" aria-label="Instagram">
-        <i class="fab fa-instagram"></i>
-      </a>
-      <a href="https://coff.ee/iadden" target="_blank" aria-label="Buy me a coffee">
-        <img src="donateicon.png" alt="Donate" class="donate-icon">
-      </a>
-    </div>
-  </div>
-
-  <div class="cards-container">
-    <div class="card">
-      <h1>SwipeClean Beta</h1>
-      <p class="lead">Tinder for your photos.<br/>Swipe left to delete, right to keep. Done.</p>
-      <a href="https://testflight.apple.com/join/hDVEmA4q" target="_blank">
-        <img src="Swipe.png" alt="SwipeClean Demo" class="swipe-demo">
-      </a>
-
-      <div class="steps">
-        <div><i>📲</i><span>Tap to join the beta on your iPhone</span></div>
-        <div><i>💡</i><span>Use the app and send feedback</span></div>
-      </div>
-
-      <a href="https://testflight.apple.com/join/hDVEmA4q" target="_blank" class="cta-button">Join the Beta</a>
-    </div>
-
-    <div class="card collab-section">
-      <div class="logo-container">
-        <a href="https://jorobean.com" target="_blank">
-          <img src="jorobean_logo.png" alt="Jorobean" class="collab-logo jorobean-logo">
-        </a>
-        <span class="collab-x">×</span>
-        <a href="https://zellerfeld.com" target="_blank">
-          <img src="zellerfeld_logo.png" alt="Zellerfeld" class="collab-logo zellerfeld-logo">
-        </a>
-      </div>
-      <p class="lead" style="margin: 0.5rem 0 0.5rem; font-style: italic; line-height: 1.7; opacity: 0.95;">My mom always said they'd make shoes for me. Now I make my own.<br><br>
-I've spent the past 5 years building Jorobean, and this partnership with Zellerfeld finally makes what I've been working toward possible. Their 3D printing tech means I can finally get my designs on more feet without the barriers of traditional shoe manufacturing.<br><br>
-TRAIL, my first model, is almost here — and it's just the beginning.<br><br>
-<span style="font-weight: 600;">Wear The Love.</span></p>
-      <div style="display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;">
-        <div style="margin-top: 2rem">
-          <a href="https://jorobean.com" target="_blank">
-            <img src="trail.png" alt="Trail Shoe" class="trail-shoe" style="margin: 0 auto 0.5rem">
-          </a>
-          <h2 class="coming-soon" style="margin: 0">COMING SOON</h2>
+    <div id="app">
+        <div class="nav-bar">
+            <div></div>
+            <div class="center-controls">
+                <button class="btn" id="recordBtn">Start Recording</button>
+            </div>
+            <div class="right-controls">
+                <button class="btn icon-btn" id="pipBtn" title="In-Browser Picture-in-Picture">
+                    <i class="fas fa-compress"></i>
+                </button>
+                <button class="btn icon-btn" id="nativePipBtn" title="Float Window">
+                    <i class="fas fa-external-link-alt"></i>
+                </button>
+                <button class="btn icon-btn" id="resetPosBtn" title="Reset Position">
+                    <i class="fas fa-undo"></i>
+                </button>
+            </div>
         </div>
-        <a href="https://Jorobean.com" target="_blank" class="stay-updated-button" style="margin-top: 3rem">Stay Updated</a>
-      </div>
+        <div class="recording-indicator">
+            🔴 Recording
+        </div>
+        <div class="main-content">
+            <div class="webcam-container" id="webcamContainer">
+                <video id="webcam" autoplay playsinline webkit-playsinline playsInline muted></video>
+                <div class="status" id="status">Click "Start Webcam" to begin</div>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <div class="footer">
-    &copy; iAdden <span id="year"></span>
-  </div>
+    <script>
+        const webcam = document.getElementById('webcam');
+        const status = document.getElementById('status');
+        const recordBtn = document.getElementById('recordBtn');
+        const webcamContainer = document.getElementById('webcamContainer');
+        const pipBtn = document.getElementById('pipBtn');
+        const nativePipBtn = document.getElementById('nativePipBtn');
+        const resetPosBtn = document.getElementById('resetPosBtn');
+        let mediaRecorder;
+        let recordedChunks = [];
+        // Draggable PiP functionality
+        let isDragging = false;
+        let currentX;
+        let currentY;
+        let initialX;
+        let initialY;
+        let xOffset = 0;
+        let yOffset = 0;
 
-  <script>
-    const words = ['love', 'riddims', 'caffeine'];
-    let wordIndex = 0;
-    let charIndex = 0;
-    let isDeleting = false;
-    let isWaiting = false;
-    const typingSpeed = 200;
-    const deletingSpeed = 120;
-    const wordDelay = 3000; // 3 second pause after word completes
+        webcamContainer.addEventListener('mousedown', e => {
+            if (webcamContainer.classList.contains('pip')) {
+                isDragging = true;
+                initialX = e.clientX - xOffset;
+                initialY = e.clientY - yOffset;
+            }
+        });
 
-    function typeEffect() {
-      const typingElement = document.querySelector('.typing-text');
-      if (!typingElement) return;
+        document.addEventListener('mousemove', e => {
+            if (isDragging && webcamContainer.classList.contains('pip')) {
+                e.preventDefault();
+                currentX = e.clientX - initialX;
+                currentY = e.clientY - initialY;
+                xOffset = currentX;
+                yOffset = currentY;
+                webcamContainer.style.transform = `translate3d(${currentX}px, ${currentY}px, 0)`;
+            }
+        });
 
-      const currentWord = words[wordIndex];
+        document.addEventListener('mouseup', () => {
+            isDragging = false;
+        });
 
-      if (isWaiting) {
-        // Just wait, don't do anything
-        return;
-      }
+        // In-browser PiP controls
+        pipBtn.addEventListener('click', () => {
+            // Exit native PiP if it's active
+            if (document.pictureInPictureElement) {
+                document.exitPictureInPicture();
+            }
+            
+            webcamContainer.classList.toggle('pip');
+            pipBtn.classList.toggle('active');
+            nativePipBtn.classList.remove('active');
+            
+            if (!webcamContainer.classList.contains('pip')) {
+                // Reset position when exiting PiP
+                webcamContainer.style.transform = '';
+                xOffset = 0;
+                yOffset = 0;
+            } else {
+                // Set initial PiP position
+                webcamContainer.style.transform = 'translate3d(20px, 20px, 0)';
+                xOffset = 20;
+                yOffset = 20;
+            }
+        });
 
-      if (isDeleting) {
-        // Deleting characters
-        typingElement.textContent = currentWord.substring(0, charIndex - 1);
-        charIndex--;
-        
-        if (charIndex === 0) {
-          // Finished deleting, move to next word
-          isDeleting = false;
-          wordIndex = (wordIndex + 1) % words.length;
-          setTimeout(typeEffect, typingSpeed);
-        } else {
-          setTimeout(typeEffect, deletingSpeed);
+        // Native floating window PiP
+        nativePipBtn.addEventListener('click', async () => {
+            try {
+                if (document.pictureInPictureElement) {
+                    // Exit PiP
+                    await document.exitPictureInPicture();
+                    nativePipBtn.classList.remove('active');
+                } else {
+                    // Enter PiP
+                    // Exit in-browser PiP if it's active
+                    webcamContainer.classList.remove('pip');
+                    pipBtn.classList.remove('active');
+                    
+                    const pipWindow = await webcam.requestPictureInPicture();
+                    nativePipBtn.classList.add('active');
+                    
+                    // Apply mirror effect to PiP window
+                    pipWindow.addEventListener('resize', () => {
+                        pipWindow.video.style.transform = 'scaleX(-1)';
+                    });
+                    
+                    // Add event listener for when PiP is closed
+                    webcam.addEventListener('leavepictureinpicture', () => {
+                        nativePipBtn.classList.remove('active');
+                    });
+                }
+            } catch (err) {
+                console.error('PiP failed:', err);
+                alert('Picture-in-Picture failed. Your browser might not support this feature.');
+            }
+        });
+
+        resetPosBtn.addEventListener('click', () => {
+            if (webcamContainer.classList.contains('pip')) {
+                webcamContainer.style.transform = 'translate3d(20px, 20px, 0)';
+                xOffset = 20;
+                yOffset = 20;
+            }
+        });
+
+
+
+        // Auto-start webcam when page loads
+        async function startWebcam() {
+            // First check if we have navigator.mediaDevices available
+            if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                status.textContent = 'Camera API not available in your browser';
+                return;
+            }
+
+            try {
+                // For iOS, we need to start with basic constraints
+                const constraints = {
+                    video: true,
+                    audio: false
+                };
+
+                // Check if we're on iOS
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                
+                if (isIOS) {
+                    status.textContent = 'Requesting camera access...';
+                    // On iOS, we need to request permission first
+                    const permissionResult = await navigator.permissions.query({ name: 'camera' });
+                    if (permissionResult.state === 'denied') {
+                        throw new Error('Camera access denied. Please enable camera access in your Settings app: Settings > Safari > Camera');
+                    }
+                }
+                
+                status.textContent = 'Starting camera...';
+                const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                // Only after we have basic video, try to set ideal resolution
+                const track = stream.getVideoTracks()[0];
+                if (track) {
+                    try {
+                        await track.applyConstraints({
+                            width: { ideal: 1280 },
+                            height: { ideal: 720 },
+                            facingMode: 'user'
+                        });
+                    } catch (e) {
+                        console.log('Could not set ideal resolution, using default', e);
+                    }
+                }
+                webcam.srcObject = stream;
+                status.textContent = 'Webcam is active';
+            } catch (err) {
+                console.error('Webcam error:', err);
+                
+                if (/iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream) {
+                    // iOS specific error handling
+                    status.innerHTML = `
+                        Camera access failed.<br>
+                        Please check:<br>
+                        1. Settings > Safari > Camera<br>
+                        2. Refresh this page<br>
+                        3. Allow camera when prompted
+                    `;
+                    alert('To enable your camera on iOS:\n\n1. Go to Settings > Safari > Camera\n2. Enable camera access\n3. Return here and refresh the page');
+                } else {
+                    status.textContent = 'Error: ' + err.message;
+                }
+            }
         }
-      } else {
-        // Typing characters
-        typingElement.textContent = currentWord.substring(0, charIndex + 1);
-        charIndex++;
         
-        if (charIndex === currentWord.length) {
-          // Finished typing the word, wait before deleting
-          isWaiting = true;
-          setTimeout(() => {
-            isWaiting = false;
-            isDeleting = true;
-            typeEffect();
-          }, wordDelay);
-        } else {
-          setTimeout(typeEffect, typingSpeed);
-        }
-      }
-    }
+        // Start webcam immediately
+        startWebcam();
 
-    window.addEventListener('DOMContentLoaded', () => {
-      const btn = document.getElementById('themeToggle');
-      
-      // Use default theme since localStorage isn't available in artifacts
-      let defaultTheme = 'dark';
-      
-      // Start the typing animation
-      typeEffect();
+        // Handle recording
+        recordBtn.addEventListener('click', async () => {
+            if (!mediaRecorder || mediaRecorder.state === 'inactive') {
+                // First make sure webcam is started
+                if (!webcam.srcObject) {
+                    await startWebcam();
+                    if (!webcam.srcObject) {
+                        alert('Unable to start webcam. Please make sure you have granted camera permissions.');
+                        return;
+                    }
+                }
+                
+                recordBtn.disabled = true;
+                recordBtn.textContent = 'Preparing...';
+                
+                try {
+                    // Get screen stream with audio, specifically for window sharing
+                    const screenStream = await navigator.mediaDevices.getDisplayMedia({
+                        video: {
+                            displaySurface: "window",
+                            cursor: "always",
+                            preferCurrentTab: true
+                        },
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            sampleRate: 44100
+                        },
+                        systemAudio: "include",
+                        preferCurrentTab: true
+                    });
 
-      document.documentElement.setAttribute('data-theme', defaultTheme);
-      btn.textContent = defaultTheme === 'dark' ? '☀️' : '🌙';
+                    // Check if user selected a window
+                    const videoTrack = screenStream.getVideoTracks()[0];
+                    if (videoTrack.getSettings().displaySurface !== 'window') {
+                        screenStream.getTracks().forEach(track => track.stop());
+                        throw new Error('Please select a window to share, not the entire screen.');
+                    }
 
-      btn.addEventListener('click', () => {
-        const currentTheme = document.documentElement.getAttribute('data-theme');
-        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-        document.documentElement.setAttribute('data-theme', newTheme);
-        
-        btn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
-      });
+                    // Get microphone audio
+                    const micStream = await navigator.mediaDevices.getUserMedia({
+                        audio: {
+                            echoCancellation: true,
+                            noiseSuppression: true,
+                            sampleRate: 44100
+                        }
+                    });
+                    
+                    const webcamStream = webcam.srcObject;
+                    if (!webcamStream) {
+                        throw new Error('Please start webcam first');
+                    }
 
-      const yearSpan = document.getElementById('year');
-      if (yearSpan) yearSpan.textContent = new Date().getFullYear();
-    });
-  </script>
+                    // Combine all audio tracks
+                    const audioContext = new AudioContext();
+                    const destination = audioContext.createMediaStreamDestination();
+                    
+                    // Add screen audio if it exists
+                    const screenAudioTracks = screenStream.getAudioTracks();
+                    if (screenAudioTracks.length > 0) {
+                        const screenAudioSource = audioContext.createMediaStreamSource(new MediaStream([screenAudioTracks[0]]));
+                        screenAudioSource.connect(destination);
+                    }
+
+                    // Add microphone audio
+                    const micSource = audioContext.createMediaStreamSource(micStream);
+                    micSource.connect(destination);
+
+                    // Create canvas for combining streams
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    const screenVideo = document.createElement('video');
+                    
+                    // Set up canvas size based on screen resolution
+                    canvas.width = 1920;  // standard HD width
+                    canvas.height = 1080; // standard HD height
+                    
+                    screenVideo.srcObject = screenStream;
+                    await screenVideo.play();
+
+                    // Create a stream from the canvas
+                    const canvasStream = canvas.captureStream(30); // 30 FPS
+
+                    // Add the combined audio tracks to the canvas stream
+                    destination.stream.getAudioTracks().forEach(track => {
+                        canvasStream.addTrack(track);
+                    });
+
+                    // Function to draw both streams on canvas
+                    function drawCanvas() {
+                        // Draw screen capture (main content)
+                        ctx.drawImage(screenVideo, 0, 0, canvas.width, canvas.height);
+                        
+                        // Draw webcam in corner (picture-in-picture style)
+                        const webcamWidth = canvas.width / 4;
+                        const webcamHeight = (webcamWidth * 3) / 4;
+                        // Save the current context state
+                        ctx.save();
+                        
+                        // Set up the mirror effect for webcam
+                        ctx.translate(canvas.width - 20, 0); // Move to right edge
+                        ctx.scale(-1, 1); // Flip horizontally
+                        
+                        // Draw the webcam (now with coordinates adjusted for the flip)
+                        ctx.drawImage(webcam,
+                            0, // x is now 0 because we're drawing from the right edge
+                            canvas.height - webcamHeight - 20, // Same y position
+                            webcamWidth,
+                            webcamHeight
+                        );
+                        
+                        // Restore the context to its original state
+                        ctx.restore();
+                        
+                        requestAnimationFrame(drawCanvas);
+                    }
+                    drawCanvas();
+
+                    // Set up MediaRecorder with the canvas stream
+                    mediaRecorder = new MediaRecorder(canvasStream, {
+                        mimeType: 'video/webm;codecs=vp9,opus',
+                        audioBitsPerSecond: 128000
+                    });
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        if (event.data.size > 0) {
+                            recordedChunks.push(event.data);
+                        }
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(recordedChunks, {
+                            type: 'video/webm'
+                        });
+                        
+                        // Create download link and trigger download
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+                        a.href = url;
+                        a.download = `recording-${timestamp}.webm`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                        
+                        // Clean up
+                        recordedChunks = [];
+                        document.body.classList.remove('recording');
+                        recordBtn.textContent = 'Start Recording';
+                        recordBtn.classList.remove('recording');
+
+                        
+                        // Stop all tracks
+                        screenStream.getTracks().forEach(track => track.stop());
+                    };
+
+                    // Start recording
+                    mediaRecorder.start(1000); // Capture chunks every second
+                    document.body.classList.add('recording');
+                    recordBtn.textContent = 'Stop Recording';
+                    recordBtn.classList.add('recording');
+                    
+                    document.querySelector('.recording-indicator').innerHTML = '<i class="fas fa-circle" style="color: #ff0000;"></i> Recording';
+
+
+                } catch (err) {
+                    console.error('Recording error:', err);
+                    alert('Error starting recording: ' + err.message);
+                }
+            } else {
+                mediaRecorder.stop();
+            }
+        });
+    </script>
 </body>
-</html></html></html>
+</html>

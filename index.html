@@ -1,482 +1,485 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Screen & Camera Recorder</title>
-    <style>
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: #000;
-            color: white;
-            height: 100vh;
-            overflow: hidden;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>iAdden</title>
+  
+  <!-- iOS homescreen icon -->
+  <link rel="apple-touch-icon" href="iadden.jpg">
 
-        .container {
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
-        .permission-banner {
-            background: #ff4444;
-            color: white;
-            text-align: center;
-            padding: 10px;
-            display: none;
-        }
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
 
-        .permission-banner.active {
-            display: block;
-        }
+  <style>
+    :root {
+      --bg: #121212;
+      --text: #f0f0f0;
+      --card: #1f1f1f;
+      --accent: #0a84ff;
+      --accent-hover: #0066cc;
+      --border: #333;
+    }
 
-        .status-indicator {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 10px 20px;
-            border-radius: 20px;
-            background: #333;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
+    [data-theme="light"] {
+      --bg: #e6e6e6;
+      --text: #1a1a1a;
+      --card: #f3f4f6;
+      --accent: #007aff;
+      --accent-hover: #005ecb;
+      --border: #e0e0e0;
+    }
 
-        .recording-dot {
-            width: 12px;
-            height: 12px;
-            background: #666;
-            border-radius: 50%;
-        }
+    * {
+      box-sizing: border-box;
+    }
 
-        .recording-dot.active {
-            background: #ff4444;
-            animation: pulse 2s infinite;
-        }
+    body {
+      margin: 0;
+      background-color: var(--bg);
+      color: var(--text);
+      font-family: 'Inter', 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 2rem 1rem;
+      min-height: 100vh;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.5; }
-            100% { opacity: 1; }
-        }
+    .profile-pic {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 3px solid var(--border);
+      margin-bottom: 1rem;
+    }
 
-        .video-container {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100vw;
-            height: 100vh;
-            background: #000;
-        }
+    .personal-header {
+      text-align: center;
+      max-width: 600px;
+      margin-bottom: 2rem;
+      opacity: 0.95;
+    }
 
-        #cameraVideo {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
+    .personal-header h2 {
+      margin: 0.2rem 0;
+      font-size: 1.25rem;
+      font-weight: 600;
+    }
 
-        .camera-controls {
-            position: fixed;
-            bottom: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: rgba(0,0,0,0.4);
-            padding: 12px;
-            border-radius: 30px;
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            backdrop-filter: blur(10px);
-            z-index: 1000;
-        }
+    .personal-header p {
+      margin: 0.2rem 0;
+      font-size: 0.95rem;
+      color: var(--text);
+    }
 
-        .control-btn {
-            background: none;
-            border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            padding: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: background-color 0.3s;
-        }
+    .typing-text {
+      border-right: 2px solid var(--text);
+      padding-right: 2px;
+      animation: blink 0.75s step-end infinite;
+    }
 
-        .control-btn:hover {
-            background: rgba(255,255,255,0.1);
-        }
+    @keyframes blink {
+      from, to { border-color: transparent }
+      50% { border-color: var(--text) }
+    }
 
-        .control-btn svg {
-            width: 24px;
-            height: 24px;
-            fill: white;
-        }
+    .socials {
+      margin-top: 0.6rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+    }
 
-        .control-btn.recording {
-            background: rgba(255,59,48,0.2);
-        }
+    .socials a {
+      color: var(--text);
+      text-decoration: none;
+      font-size: 1.4rem;
+      transition: color 0.3s ease;
+      display: flex;
+      align-items: center;
+    }
 
-        .control-btn.recording svg {
-            fill: #ff3b30;
-        }
+    .socials a:hover {
+      color: var(--accent);
+    }
 
-        video {
-            width: 100%;
-            background: #000;
-            border-radius: 8px;
-        }
+    .donate-icon {
+      width: 1.4rem;
+      height: 1.4rem;
+      transition: filter 0.3s ease;
+    }
 
-        #cameraVideo {
-            transform: scaleX(-1); /* Mirror the camera feed */
-        }
+    /* Make donate icon black in light mode, white in dark mode */
+    [data-theme="light"] .donate-icon {
+      filter: brightness(0);
+    }
 
-        .controls {
-            margin-top: 20px;
-            display: flex;
-            gap: 10px;
-        }
+    [data-theme="dark"] .donate-icon {
+      filter: brightness(0) invert(1);
+    }
 
-        button {
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            transition: background 0.3s;
-        }
+    .card {
+      background: var(--card);
+      border-radius: 20px;
+      padding: 3rem;
+      box-shadow: 0 12px 36px rgba(0,0,0,0.1);
+      max-width: 480px;
+      width: 100%;
+      text-align: center;
+      border: 1px solid var(--border);
+      position: relative;
+      transition: all 0.3s ease;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      min-height: 600px;
+    }
 
-        button.start {
-            background: #4CAF50;
-            color: white;
-        }
+    h1 {
+      font-size: 1.9rem;
+      margin: 0 0 0.5rem;
+    }
 
-        button.stop {
-            background: #f44336;
-            color: white;
-        }
+    p.lead {
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      color: var(--text);
+      opacity: 0.9;
+      line-height: 1.5;
+    }
 
-        button:disabled {
-            background: #666;
-            cursor: not-allowed;
-        }
+    .swipe-demo {
+      max-width: 65%;
+      height: auto;
+      margin: 2rem auto;
+      display: block;
+      transition: all 0.3s ease;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+    }
 
-        .consent-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background: #2a2a2a;
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.5);
-            max-width: 500px;
-            width: 90%;
-        }
+    .swipe-demo:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 12px 28px rgba(0,0,0,0.25);
+    }
 
-        .consent-modal h2 {
-            margin-top: 0;
-        }
+    .steps {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+      text-align: left;
+      font-size: 1rem;
+      margin: 2.5rem 0;
+      padding: 0 1rem;
+    }
 
-        .consent-modal ul {
-            margin-bottom: 20px;
-        }
+    .steps div {
+      display: flex;
+      gap: 1rem;
+      align-items: center;
+      padding: 0.8rem 1.2rem;
+      background: rgba(128,128,128,0.1);
+      border-radius: 12px;
+      transition: transform 0.2s ease;
+    }
 
-        .overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-    </style>
+    .steps div:hover {
+      transform: translateX(4px);
+    }
+
+    .steps div i {
+      font-size: 1.3rem;
+      opacity: 0.9;
+    }
+
+    .cta-button {
+      display: inline-block;
+      background-color: var(--accent);
+      color: white;
+      padding: 0.9rem 1.6rem;
+      border: none;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.3s ease;
+      margin-top: 1rem;
+    }
+
+    .cta-button:hover {
+      background-color: var(--accent-hover);
+    }
+
+    .toggle-theme {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.4rem;
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text);
+      transition: color 0.3s ease;
+    }
+
+    .footer {
+      font-size: 0.8rem;
+      margin-top: 2rem;
+      color: #999;
+      text-align: center;
+    }
+
+    .cards-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 2rem;
+      width: 100%;
+      padding: 0 1rem;
+      margin: 0 auto;
+    }
+
+    .card {
+      flex: 1;
+      min-width: min(400px, 100%);
+      max-width: 480px;
+    }
+
+    .collab-section {
+      margin-top: 0;
+    }
+
+    .logo-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .collab-logo {
+      height: 32px;
+      width: auto;
+    }
+
+    /* Switch Jorobean logo in dark mode */
+    [data-theme="dark"] .jorobean-logo {
+      content: url("jorobean_logoalt.png");
+    }
+
+    /* Make Zellerfeld logo white in dark mode */
+    [data-theme="dark"] .zellerfeld-logo {
+      filter: brightness(0) invert(1);
+    }
+
+    .collab-x {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--text);
+    }
+
+    .wave-shoe {
+      max-width: 100%;
+      height: auto;
+      margin-bottom: 0.5rem;
+    }
+
+    .trail-shoe {
+      max-width: 90%;
+      height: auto;
+      display: block;
+      margin: 0 auto 0.5rem;
+    }    .coming-soon {
+      font-size: 1.8rem;
+      margin: 0.5rem 0 1.5rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+    }
+
+    .stay-updated-button {
+      display: inline-block;
+      background-color: #b71111;
+      color: white;
+      padding: 0.9rem 1.6rem;
+      border: none;
+      border-radius: 999px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      transition: background 0.3s ease;
+    }
+
+    .stay-updated-button:hover {
+      background-color: #940d0d;
+    }
+
+    @media (min-width: 901px) {
+      .cards-container {
+        max-width: 1000px;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .card {
+        padding: 2rem 1.5rem;
+      }
+
+      h1 {
+        font-size: 1.6rem;
+      }
+    }
+  </style>
 </head>
 <body>
-    <div class="permission-banner">
-        Camera and screen recording permissions are required
+  <button class="toggle-theme" id="themeToggle" aria-label="Toggle theme">☀️</button>
+
+  <div class="personal-header">
+    <img src="iadden.jpg" alt="iAdden" class="profile-pic" />
+    <h2>Hi, I'm Kerry</h2>
+    <p>Powered by <span class="typing-text"></span></p>
+    <p>Check out some of my projects below</p>
+    <div class="socials">
+      <a href="https://instagram.com/iadden" target="_blank" aria-label="Instagram">
+        <i class="fab fa-instagram"></i>
+      </a>
+      <a href="https://coff.ee/iadden" target="_blank" aria-label="Buy me a coffee">
+        <img src="donateicon.png" alt="Donate" class="donate-icon">
+      </a>
+    </div>
+  </div>
+
+  <div class="cards-container">
+    <div class="card">
+      <h1>SwipeClean Beta</h1>
+      <p class="lead">Tinder for your photos.<br/>Swipe left to delete, right to keep. Done.</p>
+      <a href="https://testflight.apple.com/join/hDVEmA4q" target="_blank">
+        <img src="Swipe.png" alt="SwipeClean Demo" class="swipe-demo">
+      </a>
+
+      <div class="steps">
+        <div><i>📲</i><span>Tap to join the beta on your iPhone</span></div>
+        <div><i>💡</i><span>Use the app and send feedback</span></div>
+      </div>
+
+      <a href="https://testflight.apple.com/join/hDVEmA4q" target="_blank" class="cta-button">Join the Beta</a>
     </div>
 
-    <div class="container">
-        <h1>Screen & Camera Recorder</h1>
+    <div class="card collab-section">
+      <div class="logo-container">
+        <a href="https://jorobean.com" target="_blank">
+          <img src="jorobean_logo.png" alt="Jorobean" class="collab-logo jorobean-logo">
+        </a>
+        <span class="collab-x">×</span>
+        <a href="https://zellerfeld.com" target="_blank">
+          <img src="zellerfeld_logo.png" alt="Zellerfeld" class="collab-logo zellerfeld-logo">
+        </a>
+      </div>
+      <p class="lead" style="margin: 0.5rem 0 0.5rem; font-style: italic; line-height: 1.7; opacity: 0.95;">My mom always said they'd make shoes for me. Now I make my own.<br><br>
+I've spent the past 5 years building Jorobean, and this partnership with Zellerfeld finally makes what I've been working toward possible. Their 3D printing tech means I can finally get my designs on more feet without the barriers of traditional shoe manufacturing.<br><br>
+TRAIL, my first model, is almost here — and it's just the beginning.<br><br>
+<span style="font-weight: 600;">Wear The Love.</span></p>
+      <div style="display: flex; flex-direction: column; justify-content: space-between; flex-grow: 1;">
+        <div style="margin-top: 2rem">
+          <a href="https://jorobean.com" target="_blank">
+            <img src="trail.png" alt="Trail Shoe" class="trail-shoe" style="margin: 0 auto 0.5rem">
+          </a>
+          <h2 class="coming-soon" style="margin: 0">COMING SOON</h2>
+        </div>
+        <a href="https://Jorobean.com" target="_blank" class="stay-updated-button" style="margin-top: 3rem">Stay Updated</a>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">
+    &copy; iAdden <span id="year"></span>
+  </div>
+
+  <script>
+    const words = ['love', 'riddims', 'caffeine'];
+    let wordIndex = 0;
+    let charIndex = 0;
+    let isDeleting = false;
+    let isWaiting = false;
+    const typingSpeed = 200;
+    const deletingSpeed = 120;
+    const wordDelay = 3000; // 3 second pause after word completes
+
+    function typeEffect() {
+      const typingElement = document.querySelector('.typing-text');
+      if (!typingElement) return;
+
+      const currentWord = words[wordIndex];
+
+      if (isWaiting) {
+        // Just wait, don't do anything
+        return;
+      }
+
+      if (isDeleting) {
+        // Deleting characters
+        typingElement.textContent = currentWord.substring(0, charIndex - 1);
+        charIndex--;
         
-        <div class="video-container">
-            <video id="cameraVideo" autoplay playsinline></video>
-            <div class="camera-controls">
-                <button id="recordBtn" class="control-btn">
-                    <svg viewBox="0 0 24 24">
-                        <circle cx="12" cy="12" r="6"/>
-                    </svg>
-                </button>
-                <button id="flipCameraBtn" class="control-btn">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M20 4h-3.17L15 2H9L7.17 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm-5 11.5V13H9v2.5L5.5 12 9 8.5V11h6V8.5l3.5 3.5-3.5 3.5z"/>
-                    </svg>
-                </button>
-                <button id="pipBtn" class="control-btn">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M19 7h-8v6h8V7zm2-4H3C2 3 1 4 1 5v14c0 1 1 2 2 2h18c1 0 2-1 2-2V5c0-1-1-2-2-2zm0 16H3V5h18v14z"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-
-
-    </div>
-
-    <div id="consentModal" class="overlay" style="display: none;">
-        <div class="consent-modal">
-            <h2>Permission Required</h2>
-            <p>This application requires access to:</p>
-            <ul>
-                <li>Your camera feed</li>
-                <li>Your screen content</li>
-            </ul>
-            <p>By clicking "Accept", you acknowledge that:</p>
-            <ul>
-                <li>Your camera feed will be displayed and recorded</li>
-                <li>Your screen content will be recorded</li>
-                <li>All recordings stay on your device unless you choose to download them</li>
-            </ul>
-            <button id="acceptBtn" class="start">Accept & Continue</button>
-            <button id="declineBtn" class="stop">Decline</button>
-        </div>
-    </div>
-
-    <script>
-        let cameraStream;
-        let currentFacingMode = 'user';
-        let mediaRecorder;
-        let recordedChunks = [];
-        let isRecording = false;
-
-        const cameraVideo = document.getElementById('cameraVideo');
-        const flipCameraBtn = document.getElementById('flipCameraBtn');
-        const recordBtn = document.getElementById('recordBtn');
-        const pipBtn = document.getElementById('pipBtn');
-        const consentModal = document.getElementById('consentModal');
-        const acceptBtn = document.getElementById('acceptBtn');
-        const declineBtn = document.getElementById('declineBtn');
-        const permissionBanner = document.querySelector('.permission-banner');
-
-        // Recording functionality
-        recordBtn.addEventListener('click', async () => {
-            if (isRecording) {
-                mediaRecorder.stop();
-                recordBtn.classList.remove('recording');
-            } else {
-                recordedChunks = [];
-                const stream = cameraVideo.srcObject;
-                mediaRecorder = new MediaRecorder(stream);
-                
-                mediaRecorder.ondataavailable = (e) => {
-                    if (e.data.size > 0) recordedChunks.push(e.data);
-                };
-
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'camera-recording.webm';
-                    document.body.appendChild(a);
-                    a.click();
-                    document.body.removeChild(a);
-                    URL.revokeObjectURL(url);
-                };
-
-                mediaRecorder.start();
-                recordBtn.classList.add('recording');
-            }
-            isRecording = !isRecording;
-        });
-
-        // PiP functionality
-        pipBtn.addEventListener('click', async () => {
-            try {
-                if (document.pictureInPictureElement) {
-                    await document.exitPictureInPicture();
-                } else if (document.pictureInPictureEnabled) {
-                    await cameraVideo.requestPictureInPicture();
-                }
-            } catch (err) {
-                console.error('PiP error:', err);
-            }
-        });
-
-        // Hide flip camera button if not on mobile
-        if (!('mediaDevices' in navigator && 'enumerateDevices' in navigator.mediaDevices)) {
-            flipCameraBtn.style.display = 'none';
+        if (charIndex === 0) {
+          // Finished deleting, move to next word
+          isDeleting = false;
+          wordIndex = (wordIndex + 1) % words.length;
+          setTimeout(typeEffect, typingSpeed);
+        } else {
+          setTimeout(typeEffect, deletingSpeed);
         }
+      } else {
+        // Typing characters
+        typingElement.textContent = currentWord.substring(0, charIndex + 1);
+        charIndex++;
+        
+        if (charIndex === currentWord.length) {
+          // Finished typing the word, wait before deleting
+          isWaiting = true;
+          setTimeout(() => {
+            isWaiting = false;
+            isDeleting = true;
+            typeEffect();
+          }, wordDelay);
+        } else {
+          setTimeout(typeEffect, typingSpeed);
+        }
+      }
+    }
 
-        // Show consent modal on load
-        window.addEventListener('load', () => {
-            consentModal.style.display = 'flex';
-        });
+    window.addEventListener('DOMContentLoaded', () => {
+      const btn = document.getElementById('themeToggle');
+      
+      // Use default theme since localStorage isn't available in artifacts
+      let defaultTheme = 'dark';
+      
+      // Start the typing animation
+      typeEffect();
 
-        acceptBtn.addEventListener('click', async () => {
-            consentModal.style.display = 'none';
-            try {
-                // Request camera permission
-                cameraStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: currentFacingMode },
-                    audio: false
-                });
-                cameraVideo.srcObject = cameraStream;
-                permissionBanner.classList.remove('active');
+      document.documentElement.setAttribute('data-theme', defaultTheme);
+      btn.textContent = defaultTheme === 'dark' ? '☀️' : '🌙';
 
-                // Check if device has multiple cameras
-                const devices = await navigator.mediaDevices.enumerateDevices();
-                const hasMultipleCameras = devices.filter(device => device.kind === 'videoinput').length > 1;
-                flipCameraBtn.style.display = hasMultipleCameras ? 'block' : 'none';
-                
-                // Automatically enter PiP mode
-                try {
-                    if (document.pictureInPictureEnabled) {
-                        await cameraVideo.requestPictureInPicture();
-                    }
-                } catch (pipErr) {
-                    console.error('PiP error:', pipErr);
-                }
-            } catch (err) {
-                console.error('Error accessing camera:', err);
-                permissionBanner.classList.add('active');
-            }
-        });
+      btn.addEventListener('click', () => {
+        const currentTheme = document.documentElement.getAttribute('data-theme');
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+        document.documentElement.setAttribute('data-theme', newTheme);
+        
+        btn.textContent = newTheme === 'dark' ? '☀️' : '🌙';
+      });
 
-        declineBtn.addEventListener('click', () => {
-            alert('Camera and screen recording permissions are required to use this application.');
-        });
-
-        startBtn.addEventListener('click', async () => {
-            try {
-                // Request screen capture permission
-                screenStream = await navigator.mediaDevices.getDisplayMedia({ 
-                    video: true,
-                    audio: true
-                });
-                screenVideo.srcObject = screenStream;
-
-                // Combine both streams
-                const tracks = [...cameraStream.getTracks(), ...screenStream.getTracks()];
-                const combinedStream = new MediaStream(tracks);
-
-                // Start recording
-                mediaRecorder = new MediaRecorder(combinedStream);
-                recordedChunks = [];
-
-                mediaRecorder.ondataavailable = (e) => {
-                    if (e.data.size > 0) {
-                        recordedChunks.push(e.data);
-                    }
-                };
-
-                mediaRecorder.onstop = () => {
-                    downloadBtn.disabled = false;
-                };
-
-                mediaRecorder.start();
-                startBtn.disabled = true;
-                stopBtn.disabled = false;
-                downloadBtn.disabled = true;
-                recordingDot.classList.add('active');
-                statusText.textContent = 'Recording';
-            } catch (err) {
-                console.error('Error starting recording:', err);
-                alert('Failed to start recording. Please ensure you grant screen sharing permission.');
-            }
-        });
-
-        stopBtn.addEventListener('click', () => {
-            mediaRecorder.stop();
-            screenStream.getTracks().forEach(track => track.stop());
-            startBtn.disabled = false;
-            stopBtn.disabled = true;
-            recordingDot.classList.remove('active');
-            statusText.textContent = 'Not Recording';
-        });
-
-        downloadBtn.addEventListener('click', () => {
-            const blob = new Blob(recordedChunks, { type: 'video/webm' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            document.body.appendChild(a);
-            a.style.display = 'none';
-            a.href = url;
-            a.download = 'recording.webm';
-            a.click();
-            URL.revokeObjectURL(url);
-        });
-
-                // Camera flip functionality
-        flipCameraBtn.addEventListener('click', async () => {
-            // Stop current stream
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-            }
-
-            // Toggle facing mode
-            currentFacingMode = currentFacingMode === 'user' ? 'environment' : 'user';
-
-            try {
-                // Start new stream with different camera
-                cameraStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: currentFacingMode },
-                    audio: false
-                });
-                cameraVideo.srcObject = cameraStream;
-
-                // Update mirroring based on camera type
-                cameraVideo.style.transform = currentFacingMode === 'user' ? 'scaleX(-1)' : 'scaleX(1)';
-            } catch (err) {
-                console.error('Error switching camera:', err);
-                alert('Failed to switch camera. Please try again.');
-            }
-        });
-
-        // Handle page unload
-        window.addEventListener('beforeunload', () => {
-            if (cameraStream) {
-                cameraStream.getTracks().forEach(track => track.stop());
-            }
-        });
-
-        // Re-enter PiP mode if the video exits PiP
-        cameraVideo.addEventListener('leavepictureinpicture', async () => {
-            // Wait a brief moment to prevent immediate re-entry
-            setTimeout(async () => {
-                try {
-                    if (document.pictureInPictureEnabled && !document.pictureInPictureElement) {
-                        await cameraVideo.requestPictureInPicture();
-                    }
-                } catch (pipErr) {
-                    console.error('PiP re-entry error:', pipErr);
-                }
-            }, 100);
-        });
-
-        // Add PiP button
-        const pipButton = document.createElement('button');
-        pipButton.textContent = 'Toggle Picture-in-Picture';
-        pipButton.className = 'btn';
-        pipButton.addEventListener('click', async () => {
-            try {
-                if (document.pictureInPictureElement) {
-                    await document.exitPictureInPicture();
-                } else if (document.pictureInPictureEnabled) {
-                    await cameraVideo.requestPictureInPicture();
-                }
-            } catch (pipErr) {
-                console.error('PiP toggle error:', pipErr);
-            }
-        });
-        document.querySelector('.controls').appendChild(pipButton);
-    </script>
+      const yearSpan = document.getElementById('year');
+      if (yearSpan) yearSpan.textContent = new Date().getFullYear();
+    });
+  </script>
 </body>
-</html>
+</html></html></html>

@@ -110,7 +110,7 @@
 </head>
 <body>
     <div class="video-container">
-        <video id="cameraVideo" autoplay playsinline muted disableRemotePlayback></video>
+        <video id="cameraVideo" autoplay playsinline muted="true" defaultMuted disableRemotePlayback></video>
         <button class="pip-button" id="pipBtn">
             <svg viewBox="0 0 24 24">
                 <path d="M19 7h-8v6h8V7zm2-4H3C2 3 1 4 1 5v14c0 1 1 2 2 2h18c1 0 2-1 2-2V5c0-1-1-2-2-2zm0 16H3V5h18v14z"/>
@@ -138,14 +138,7 @@
                         aspectRatio: 16/9,                 // Maintain aspect ratio
                         resizeMode: 'crop-and-scale'       // Ensure full coverage
                     },
-                    audio: {
-                        echoCancellation: true,      // Reduce echo
-                        noiseSuppression: true,      // Reduce background noise
-                        autoGainControl: true,       // Automatically adjust volume
-                        channelCount: 2,             // Stereo audio
-                        sampleRate: 48000,           // High-quality sample rate
-                        sampleSize: 16               // 16-bit audio
-                    }
+                    audio: false  // Disable audio track completely
                 };
 
                 // Function to ensure highest quality
@@ -197,10 +190,14 @@
                         Picture in Picture`;
                 } else if (document.pictureInPictureEnabled) {
                     const pipWindow = await cameraVideo.requestPictureInPicture();
-                    // Keep PiP video playing regardless of other media
+                    // Keep PiP video playing regardless of other media and ensure it stays muted
                     pipWindow.addEventListener('pause', () => {
+                        cameraVideo.muted = true;
                         cameraVideo.play().catch(err => console.log('Playback prevented'));
                     });
+
+                    // Ensure audio stays muted in PiP mode
+                    document.pictureInPictureElement.muted = true;
                     
                     // Ensure PiP window maintains mirroring
                     document.pictureInPictureElement.style.transform = 'scaleX(-1)';

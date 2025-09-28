@@ -2,7 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>STL Viewer</title>
     <style>
         * {
@@ -11,12 +13,39 @@
             box-sizing: border-box;
         }
 
+        :root {
+            --sat: env(safe-area-inset-top);
+            --sab: env(safe-area-inset-bottom);
+            --sal: env(safe-area-inset-left);
+            --sar: env(safe-area-inset-right);
+        }
+
+        html {
+            height: 100%;
+            width: 100%;
+        }
+
         body {
             overflow: hidden;
             background-color: #1e1e1e;
             color: #ffffff;
             font-family: Arial, sans-serif;
             touch-action: none;
+            min-height: 100%;
+            min-height: -webkit-fill-available;
+            padding: var(--sat) var(--sar) var(--sab) var(--sal);
+        }
+
+        #container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            width: 100vw;
+            height: 100vh;
+            height: -webkit-fill-available;
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
         @media (max-width: 768px) {
@@ -163,6 +192,48 @@
 
         .material-menu::-webkit-scrollbar {
             display: none;
+        }
+
+        .axis-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 15, 15, 0.95);
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 10px;
+            display: none;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 6px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 120px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .axis-menu.active {
+            display: grid;
+        }
+
+        .axis-option {
+            padding: 8px;
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+        }
+
+        .axis-option:hover {
+            background: var(--model-color);
+            color: white;
+            opacity: 0.7;
         }
 
         .material-option {
@@ -346,6 +417,21 @@
                 </svg>
             </button>
         </div>
+        <div class="control-group" style="position: relative;">
+            <button id="axisSnapBtn" title="Snap to Axis">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+            </button>
+            <div class="axis-menu" id="axisMenu">
+                <button class="axis-option" data-axis="x">+X</button>
+                <button class="axis-option" data-axis="-x">-X</button>
+                <button class="axis-option" data-axis="y">+Y</button>
+                <button class="axis-option" data-axis="-y">-Y</button>
+                <button class="axis-option" data-axis="z">+Z</button>
+                <button class="axis-option" data-axis="-z">-Z</button>
+            </div>
+        </div>
             <div class="material-menu" id="materialMenu">
                 <button class="material-option" data-material="foamyTPU">Foamy TPU</button>
                 <button class="material-option" data-material="regularTPU">Regular TPU</button>
@@ -496,6 +582,7 @@
         document.getElementById('bgColor').addEventListener('change', function(event) {
             const color = event.target.value;
             scene.background = new THREE.Color(color);
+            document.body.style.backgroundColor = color;
             saveColorPreference('background', color);
         });
 
@@ -626,6 +713,7 @@
             document.documentElement.style.setProperty('--model-color', savedModelColor);
             
             scene.background = new THREE.Color(savedBgColor);
+            document.body.style.backgroundColor = savedBgColor;
             if (currentModel) {
                 currentModel.material.color.setStyle(savedModelColor);
             }
@@ -876,6 +964,63 @@
                 console.log('No default STL file found, waiting for user input');
             }
         );
+
+        // Axis snap functionality
+        const axisSnapBtn = document.getElementById('axisSnapBtn');
+        const axisMenu = document.getElementById('axisMenu');
+
+        axisSnapBtn.addEventListener('click', () => {
+            axisMenu.classList.toggle('active');
+        });
+
+        // Close axis menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!axisSnapBtn.contains(e.target) && !axisMenu.contains(e.target)) {
+                axisMenu.classList.remove('active');
+            }
+        });
+
+        function snapToAxis(axis) {
+            if (!currentModel) return;
+
+            // Calculate the bounding box to get the center
+            const boundingBox = new THREE.Box3().setFromObject(currentModel);
+            const center = new THREE.Vector3();
+            boundingBox.getCenter(center);
+
+            // Set up the camera position based on the axis
+            const distance = camera.position.distanceTo(controls.target);
+            const positions = {
+                'x': [distance, 0, 0],
+                '-x': [-distance, 0, 0],
+                'y': [0, distance, 0],
+                '-y': [0, -distance, 0],
+                'z': [0, 0, distance],
+                '-z': [0, 0, -distance]
+            };
+
+            const pos = positions[axis];
+            camera.position.set(center.x + pos[0], center.y + pos[1], center.z + pos[2]);
+            controls.target.copy(center);
+
+            // Ensure up vector is correct
+            if (axis === 'y' || axis === '-y') {
+                camera.up.set(0, 0, 1);
+            } else {
+                camera.up.set(0, 1, 0);
+            }
+
+            camera.updateProjectionMatrix();
+            controls.update();
+        }
+
+        // Add click handlers for axis snap buttons
+        document.querySelectorAll('.axis-option').forEach(button => {
+            button.addEventListener('click', () => {
+                snapToAxis(button.dataset.axis);
+                axisMenu.classList.remove('active');
+            });
+        });
 
         animate();
     </script>

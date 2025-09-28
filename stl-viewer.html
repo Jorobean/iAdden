@@ -50,30 +50,34 @@
 
         @media (max-width: 768px) {
             #controls {
-                padding: 6px 16px;
-                gap: 8px;
+                padding: 4px 8px;
+                gap: 2px;
                 flex-wrap: nowrap;
                 justify-content: center;
                 width: auto;
-                max-width: calc(100% - 32px);
+                max-width: calc(100% - 100px);
                 left: 50%;
                 transform: translateX(-50%);
+                height: 40px;
             }
 
             #screenshotButton {
                 position: fixed;
-                left: auto;
-                right: calc(50% - 24px);
-                transform: translateX(calc(100% + 8px));
+                right: 8px;
+                bottom: calc(16px + var(--sab));
+                transform: none;
+                padding: 4px;
             }
 
             .control-group {
-                gap: 8px;
+                gap: 2px;
+                height: 100%;
             }
 
             button {
-                width: 36px;
-                height: 36px;
+                width: 32px;
+                height: 32px;
+                padding: 6px;
             }
 
             input[type="color"] {
@@ -105,22 +109,22 @@
             transform: translateX(-50%);
             z-index: 100;
             background-color: rgba(0, 0, 0, 0.7);
-            padding: 6px 16px;
+            padding: 4px 8px;
             border-radius: 9999px;
             display: flex;
             flex-direction: row;
-            gap: 8px;
+            gap: 2px;
             align-items: center;
             width: fit-content;
-            max-width: calc(100% - 180px);
+            max-width: calc(100% - 100px);
             backdrop-filter: blur(30px) saturate(180%);
             -webkit-backdrop-filter: blur(30px) saturate(180%);
             border: 0.5px solid rgba(255, 255, 255, 0.2);
         }
 
         button {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             background-color: transparent;
             color: white;
             border: none;
@@ -130,12 +134,12 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 8px;
+            padding: 6px;
         }
 
         button svg {
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
             fill: white;
             opacity: 0.85;
             transition: all 0.2s ease;
@@ -365,7 +369,7 @@
 
         #screenshotButton {
             position: fixed;
-            right: 16px;
+            right: 8px;
             bottom: calc(16px + var(--sab));
             z-index: 99;
             background-color: rgba(0, 0, 0, 0.7);
@@ -373,9 +377,9 @@
             -webkit-backdrop-filter: blur(30px) saturate(180%);
             border: 0.5px solid rgba(255, 255, 255, 0.2);
             border-radius: 9999px;
-            padding: 6px 16px;
-            width: 48px;
-            height: 48px;
+            padding: 6px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;

@@ -4,15 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Camera</titl                    // Keep PiP video playing and handle effects
-                    pipWindow.addEventListener('play', () => {
-                        if (isLightOn) {
-                            document.pictureInPictureElement.style.filter = 'brightness(1.5)';
-                        }
-                    });
-                    
-                    // Ensure video stays playing
-                    cameraVideo.play().catch(console.error);yle>
+    <title>Camera</title>
+    <style>
         * {
             margin: 0;
             padding: 0;
@@ -50,7 +43,27 @@
             display: none !important;
         }
 
+        /* Light overlay for PiP */
+        .light-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.85);
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-backdrop-filter: brightness(1.5);
+            backdrop-filter: brightness(1.5);
+            mix-blend-mode: screen;
+        }
 
+        .light-overlay.active {
+            opacity: 1;
+        }
         
         /* PiP mirroring for all browsers */
         video:picture-in-picture {
@@ -139,6 +152,13 @@
             opacity: 1;
         }
 
+        .light-button svg {
+            width: 28px;
+            height: 28px;
+            fill: white;
+            opacity: 0.9;
+        }
+
         .pip-button, .light-button {
             background: rgba(0,0,0,0.5);
             border: none;
@@ -195,6 +215,7 @@
             </button>
             </div>
         </div>
+        <div class="light-overlay" id="lightOverlay"></div>
     </div>
 
     <script>
@@ -210,22 +231,40 @@
                 const constraints = {
                     video: {
                         facingMode: currentFacingMode,
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 },
-                        frameRate: { ideal: 30 },
-                        aspectRatio: 16/9
+                        width: { min: 1920, ideal: 3840 },  // 4K support if available
+                        height: { min: 1080, ideal: 2160 },
+                        frameRate: { ideal: 60 },           // 60fps for smooth video
+                        aspectRatio: 16/9,                 // Maintain aspect ratio
+                        resizeMode: 'crop-and-scale'       // Ensure full coverage
                     },
-                    audio: false
+                    audio: false  // Disable audio track completely
+                };
+
+                // Function to ensure highest quality
+                const ensureHighQuality = async (track) => {
+                    const capabilities = track.getCapabilities();
+                    const settings = {
+                        width: Math.min(capabilities.width?.max || 3840, 3840),
+                        height: Math.min(capabilities.height?.max || 2160, 2160),
+                        frameRate: Math.min(capabilities.frameRate?.max || 60, 60),
+                        resizeMode: 'crop-and-scale'
+                    };
+                    await track.applyConstraints(settings);
                 };
 
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                // Apply highest quality settings to video track
+                const videoTrack = stream.getVideoTracks()[0];
+                if (videoTrack) {
+                    await ensureHighQuality(videoTrack);
+                }
 
                 cameraVideo.srcObject = stream;
-                await cameraVideo.play().catch(console.error);
                 
-                // Set video element properties
-                cameraVideo.setAttribute('playsinline', '');
-                cameraVideo.setAttribute('webkit-playsinline', '');
+                // Set video element properties for better quality
+                cameraVideo.setAttribute('playsinline', true);
+                cameraVideo.setAttribute('webkit-playsinline', true);
                 cameraVideo.style.objectFit = 'cover';
 
                 // Hide PiP button if not supported
@@ -311,15 +350,14 @@
 
         // Style for active light button
         const setLightButtonActive = (active) => {
-            lightBtn.style.background = active ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.5)';
-            lightBtn.style.boxShadow = active ? '0 0 15px rgba(255,255,255,0.5)' : 'none';
+            lightBtn.classList.toggle('active', active);
         };
 
         lightBtn.addEventListener('click', () => {
             isLightOn = !isLightOn;
-            lightBtn.classList.toggle('active', isLightOn);
+            setLightButtonActive(isLightOn);
             
-            // Only apply light effect to PiP window
+            // Only apply light effect to PiP window if active
             if (document.pictureInPictureElement) {
                 document.pictureInPictureElement.style.filter = isLightOn ? 'brightness(1.5)' : 'none';
             }

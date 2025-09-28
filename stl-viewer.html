@@ -16,6 +16,34 @@
             background-color: #1e1e1e;
             color: #ffffff;
             font-family: Arial, sans-serif;
+            touch-action: none;
+        }
+
+        @media (max-width: 768px) {
+            #controls {
+                padding: 10px;
+                gap: 10px;
+                flex-wrap: wrap;
+                justify-content: center;
+                width: auto;
+                max-width: 90%;
+            }
+
+            .control-group {
+                gap: 6px;
+            }
+
+            button {
+                padding: 8px;
+            }
+
+            label {
+                display: none;
+            }
+
+            input[type="color"] {
+                margin: 0;
+            }
         }
 
         #container {
@@ -26,25 +54,171 @@
 
         #controls {
             position: fixed;
-            top: 20px;
-            left: 20px;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
             z-index: 100;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 8px;
+            background-color: rgba(15, 15, 15, 0.95);
+            padding: 2px;
+            border-radius: 9999px;
             display: flex;
-            flex-direction: column;
-            gap: 10px;
+            flex-direction: row;
+            gap: 2px;
+            align-items: center;
+            width: fit-content;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
         }
 
-        button, input[type="file"] {
-            padding: 8px 16px;
-            background-color: #4CAF50;
+        button {
+            width: 45px;
+            height: 45px;
+            background-color: rgba(30, 30, 30, 0.8);
             color: white;
             border: none;
-            border-radius: 4px;
+            border-radius: 50%;
             cursor: pointer;
-            transition: background-color 0.3s;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            backdrop-filter: blur(5px);
+        }
+
+        button svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+            transition: all 0.2s ease;
+            filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.5));
+        }
+
+        button {
+            width: 40px;
+            height: 40px;
+            background-color: rgba(30, 30, 30, 0.8);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            backdrop-filter: blur(5px);
+        }
+
+        button:hover {
+            background-color: var(--model-color);
+            opacity: 0.7;
+        }
+
+        button.active {
+            background-color: var(--model-color);
+            opacity: 1;
+        }
+
+        button:hover svg, button.active svg {
+            fill: white;
+            transform: scale(1.1);
+        }
+
+        /* Material Menu Styles */
+        .material-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 15, 15, 0.95);
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 140px;
+            max-height: calc(40px * 4 + 6px * 3 + 16px); /* 4 items + 3 gaps + padding */
+            overflow-y: auto;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+
+        .material-menu.active {
+            display: flex;
+        }
+
+        .material-menu::-webkit-scrollbar {
+            display: none;
+        }
+
+        .material-option {
+            padding: 0 12px;
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: left;
+            font-size: 13px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            height: 40px;
+            min-height: 40px;
+        }
+
+        .material-option:hover {
+            background: var(--model-color);
+            color: white;
+            opacity: 0.7;
+        }
+
+        .material-option.active {
+            background: var(--model-color);
+            color: white;
+            opacity: 1;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        button:hover {
+            background-color: #1976D2;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+        }
+
+        button:active {
+            transform: translateY(1px);
+        }
+
+        input[type="file"] {
+            color: white;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.1);
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        input[type="file"]:hover {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-color: rgba(255, 255, 255, 0.3);
         }
 
         button:hover {
@@ -52,40 +226,131 @@
         }
 
         input[type="color"] {
-            width: 50px;
-            height: 30px;
+            width: 36px;
+            height: 36px;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
+            padding: 0;
+            margin: 2px;
+            background: none;
+            transition: transform 0.2s ease;
+            overflow: hidden;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 50%;
+            padding: 0;
+        }
+
+        input[type="color"]:hover {
+            transform: scale(1.1);
         }
 
         .control-group {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 2px;
+            position: relative;
+        }        #loadingIndicator {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: rgba(15, 15, 15, 0.9);
+            color: white;
+            padding: 20px 40px;
+            border-radius: 12px;
+            display: none;
+            align-items: center;
+            gap: 12px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            z-index: 1000;
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         label {
             font-size: 14px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
         }
     </style>
 </head>
 <body>
     <div id="container"></div>
+    <div id="loadingIndicator">
+        <div class="spinner"></div>
+        <span>Loading model...</span>
+    </div>
     <div id="controls">
         <div class="control-group">
-            <input type="file" id="fileInput" accept=".stl" />
-        </div>
-        <div class="control-group">
-            <label for="bgColor">Background:</label>
             <input type="color" id="bgColor" value="#1e1e1e" />
         </div>
         <div class="control-group">
-            <label for="modelColor">Model Color:</label>
             <input type="color" id="modelColor" value="#00ff00" />
         </div>
         <div class="control-group">
-            <button id="resetCamera">Reset Camera</button>
+            <input type="file" id="fileInput" accept=".stl" style="display: none;" />
+            <button id="uploadButton" title="Upload STL" onclick="document.getElementById('fileInput').click();">
+                <svg viewBox="0 0 24 24">
+                    <path d="M9 16h6v-6h4l-7-7-7 7h4v6zm-4 2h14v2H5v-2z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="control-group">
+            <button id="resetCamera" title="Reset Camera">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="control-group">
+            <button id="autoRotate" title="Auto Rotate">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="control-group" style="position: relative;">
+            <button id="materialBtn" title="Change Material">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 6c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V6zm14 0c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-2c-1.1 0-2-.9-2-2V6zM3 16c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2v-2zm14 0c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-2c-1.1 0-2-.9-2-2v-2z"/>
+                </svg>
+            </button>
+            <div class="material-menu" id="materialMenu">
+                <button class="material-option" data-material="foamyTPU">Foamy TPU</button>
+                <button class="material-option" data-material="regularTPU">Regular TPU</button>
+                <button class="material-option" data-material="rubber">Rubber</button>
+                <button class="material-option" data-material="wireframe">Wireframe</button>
+                <button class="material-option" data-material="glossyLeather">Glossy Leather</button>
+                <button class="material-option" data-material="matteLeather">Matte Leather</button>
+                <button class="material-option" data-material="suede">Suede</button>
+                <button class="material-option" data-material="canvas">Canvas</button>
+                <button class="material-option" data-material="mesh">Mesh</button>
+                <button class="material-option" data-material="plastic">Plastic</button>
+                <button class="material-option" data-material="metal">Metal</button>
+                <button class="material-option" data-material="carbonFiber">Carbon Fiber</button>
+            </div>
         </div>
     </div>
 
@@ -111,17 +376,34 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         document.getElementById('container').appendChild(renderer.domElement);
 
-        // Lighting
-        const ambientLight = new THREE.AmbientLight(0x404040);
+        // Studio Lighting Setup
+        const ambientLight = new THREE.AmbientLight(0x404040, 0.5);
         scene.add(ambientLight);
 
-        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5);
-        directionalLight.position.set(1, 1, 1);
-        scene.add(directionalLight);
+        // Main Key Light (front-right-top)
+        const keyLight = new THREE.DirectionalLight(0xffffff, 1.0);
+        keyLight.position.set(2, 2, 2);
+        keyLight.castShadow = true;
+        scene.add(keyLight);
 
-        const pointLight = new THREE.PointLight(0xffffff, 0.5);
-        pointLight.position.set(2, 2, 2);
-        scene.add(pointLight);
+        // Fill Light (front-left)
+        const fillLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        fillLight.position.set(-2, 0, 2);
+        scene.add(fillLight);
+
+        // Back Light (rim light)
+        const backLight = new THREE.DirectionalLight(0xffffff, 0.4);
+        backLight.position.set(0, 3, -2);
+        scene.add(backLight);
+
+        // Ground Reflection
+        const groundReflection = new THREE.DirectionalLight(0xffffff, 0.2);
+        groundReflection.position.set(0, -2, 0);
+        scene.add(groundReflection);
+
+        // Soft Fill Light (hemisphere)
+        const hemiLight = new THREE.HemisphereLight(0xffffff, 0x444444, 0.4);
+        scene.add(hemiLight);
 
         // Camera and controls setup
         camera.position.z = 5;
@@ -133,8 +415,20 @@
         let currentModel = null;
         const loader = new STLLoader();
 
+        // Loading indicator functions
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        
+        function showLoading() {
+            loadingIndicator.style.display = 'flex';
+        }
+        
+        function hideLoading() {
+            loadingIndicator.style.display = 'none';
+        }
+
         // Handle file input
         document.getElementById('fileInput').addEventListener('change', function(event) {
+            showLoading();
             const file = event.target.files[0];
             if (file) {
                 const reader = new FileReader();
@@ -147,10 +441,10 @@
                                 scene.remove(currentModel);
                             }
 
-                            const material = new THREE.MeshPhongMaterial({
-                                color: document.getElementById('modelColor').value,
-                                specular: 0x111111,
-                                shininess: 200
+                            const preset = materialPresets[currentMaterialType];
+                            const material = new THREE[preset.type === 'MeshPhysicalMaterial' ? 'MeshPhysicalMaterial' : 'MeshBasicMaterial']({
+                                ...preset.properties,
+                                color: document.getElementById('modelColor').value
                             });
 
                             const mesh = new THREE.Mesh(geometry, material);
@@ -173,6 +467,9 @@
 
                             // Reset camera position
                             resetCamera();
+                            
+                            // Hide loading indicator
+                            hideLoading();
                         },
                         (xhr) => {
                             console.log((xhr.loaded / xhr.total * 100) + '% loaded');
@@ -188,15 +485,36 @@
 
         // Handle background color change
         document.getElementById('bgColor').addEventListener('change', function(event) {
-            scene.background = new THREE.Color(event.target.value);
+            const color = event.target.value;
+            scene.background = new THREE.Color(color);
+            saveColorPreference('background', color);
         });
 
         // Handle model color change
-        document.getElementById('modelColor').addEventListener('change', function(event) {
+        const modelColorInput = document.getElementById('modelColor');
+        
+        function updateModelColor(color) {
             if (currentModel) {
-                currentModel.material.color.setStyle(event.target.value);
+                currentModel.material.color.setStyle(color);
             }
+            document.documentElement.style.setProperty('--model-color', color);
+            saveColorPreference('model', color);
+        }
+
+        // Listen for both change and input events
+        modelColorInput.addEventListener('change', function(event) {
+            updateModelColor(event.target.value);
         });
+
+        modelColorInput.addEventListener('input', function(event) {
+            updateModelColor(event.target.value);
+        });
+
+        // Initialize model color variable on load
+        document.documentElement.style.setProperty(
+            '--model-color', 
+            document.getElementById('modelColor').value
+        );
 
         // Reset camera position
         function resetCamera() {
@@ -213,14 +531,72 @@
 
         document.getElementById('resetCamera').addEventListener('click', resetCamera);
 
-        // Handle window resize
+        // Handle window resize and device orientation changes
         window.addEventListener('resize', onWindowResize, false);
+        window.addEventListener('orientationchange', () => {
+            setTimeout(onWindowResize, 100);
+        });
+
+        // Mobile touch support
+        function setupTouchControls() {
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let isDragging = false;
+
+            container.addEventListener('touchstart', (e) => {
+                const touch = e.touches[0];
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+                isDragging = true;
+            }, { passive: true });
+
+            container.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const touch = e.touches[0];
+                const deltaX = touch.clientX - touchStartX;
+                const deltaY = touch.clientY - touchStartY;
+
+                touchStartX = touch.clientX;
+                touchStartY = touch.clientY;
+
+                if (e.touches.length === 1) {
+                    // Rotate
+                    controls.rotateLeft(deltaX * 0.005);
+                    controls.rotateUp(deltaY * 0.005);
+                } else if (e.touches.length === 2) {
+                    // Pinch to zoom
+                    const touch2 = e.touches[1];
+                    const dist = Math.hypot(
+                        touch2.clientX - touch.clientX,
+                        touch2.clientY - touch.clientY
+                    );
+                    controls.dollyOut(1 + dist * 0.001);
+                }
+            }, { passive: true });
+
+            container.addEventListener('touchend', () => {
+                isDragging = false;
+            }, { passive: true });
+        }
+
+        setupTouchControls();
 
         function onWindowResize() {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
         }
+
+        // Auto-rotation control
+        let autoRotating = false;
+        const autoRotateBtn = document.getElementById('autoRotate');
+
+        autoRotateBtn.addEventListener('click', () => {
+            autoRotating = !autoRotating;
+            autoRotateBtn.classList.toggle('active');
+            controls.autoRotate = autoRotating;
+            controls.autoRotateSpeed = 8.0; // Increased rotation speed
+        });
 
         // Animation loop
         function animate() {
@@ -229,8 +605,232 @@
             renderer.render(scene, camera);
         }
 
-        // Set initial background color
-        scene.background = new THREE.Color(document.getElementById('bgColor').value);
+        // Color preference management
+        function loadColorPreferences() {
+            const savedBgColor = localStorage.getItem('stlViewerBgColor') || '#1e1e1e';
+            const savedModelColor = localStorage.getItem('stlViewerModelColor') || '#00ff00';
+            
+            document.getElementById('bgColor').value = savedBgColor;
+            document.getElementById('modelColor').value = savedModelColor;
+            
+            // Initialize the CSS variable for button highlights
+            document.documentElement.style.setProperty('--model-color', savedModelColor);
+            
+            scene.background = new THREE.Color(savedBgColor);
+            if (currentModel) {
+                currentModel.material.color.setStyle(savedModelColor);
+            }
+            return { bgColor: savedBgColor, modelColor: savedModelColor };
+        }
+
+        function saveColorPreference(type, color) {
+            localStorage.setItem(
+                type === 'background' ? 'stlViewerBgColor' : 'stlViewerModelColor',
+                color
+            );
+        }
+
+        // Load saved colors
+        const savedColors = loadColorPreferences();
+
+        // Material handling
+        const materialBtn = document.getElementById('materialBtn');
+        const materialMenu = document.getElementById('materialMenu');
+        let currentMaterialType = 'regularTPU';
+
+        // Material presets
+        const materialPresets = {
+            foamyTPU: {
+                type: 'MeshPhysicalMaterial',
+                properties: {
+                    metalness: 0.0,
+                    roughness: 0.7,
+                    clearcoat: 0.1,
+                    clearcoatRoughness: 0.8,
+                    transmission: 0.1,
+                    thickness: 0.5,
+                    reflectivity: 0.2,
+                    sheen: 1.0,
+                    sheenRoughness: 0.9,
+                    sheenColor: 0xffffff
+                }
+            },
+            regularTPU: {
+                type: 'MeshPhysicalMaterial',
+                properties: {
+                    metalness: 0.1,
+                    roughness: 0.3,
+                    clearcoat: 0.3,
+                    clearcoatRoughness: 0.2,
+                    transmission: 0.2,
+                    reflectivity: 0.5,
+                    envMapIntensity: 0.5
+                }
+            },
+            rubber: {
+                type: 'MeshPhysicalMaterial',
+                properties: {
+                    metalness: 0.0,
+                    roughness: 0.9,
+                    clearcoat: 0.0,
+                    reflectivity: 0.1,
+                    sheen: 0.3,
+                    sheenRoughness: 0.8
+                }
+            },
+            wireframe: {
+                type: 'MeshBasicMaterial',
+                properties: {
+                    wireframe: true,
+                    wireframeLinewidth: 1
+                }
+            },
+            glossyLeather: {
+                type: 'MeshPhysicalMaterial',
+                properties: {
+                    metalness: 0.0,
+                    roughness: 0.3,
+                    clearcoat: 0.7,
+                    clearcoatRoughness: 0.2,
+                    reflectivity: 0.5,
+                    sheen: 0.5,
+                    sheenRoughness: 0.3
+                }
+            },
+            matteLeather: {
+                type: 'MeshPhysicalMaterial',
+                properties: {
+                    metalness: 0.0,
+                    roughness: 0.7,
+                    clearcoat: 0.1,
+                    clearcoatRoughness: 0.8,
+                    reflectivity: 0.2,
+                    sheen: 0.3,
+                    sheenRoughness: 0.7
+                }
+            },
+            suede: {
+                type: 'MeshPhysicalMaterial',
+                properties: {
+                    metalness: 0.0,
+                    roughness: 1.0,
+                    clearcoat: 0.0,
+                    reflectivity: 0.1,
+                    sheen: 1.0,
+                    sheenRoughness: 1.0,
+                    sheenColor: 0xffffff
+                }
+            },
+            canvas: {
+                type: 'MeshPhysicalMaterial',
+                properties: {
+                    metalness: 0.0,
+                    roughness: 0.9,
+                    clearcoat: 0.0,
+                    reflectivity: 0.1,
+                    sheen: 0.2,
+                    sheenRoughness: 0.9
+                }
+            },
+            mesh: {
+                type: 'MeshPhysicalMaterial',
+                properties: {
+                    metalness: 0.1,
+                    roughness: 0.6,
+                    clearcoat: 0.0,
+                    transmission: 0.2,
+                    thickness: 0.2,
+                    reflectivity: 0.2
+                }
+            },
+            plastic: {
+                type: 'MeshPhysicalMaterial',
+                properties: {
+                    metalness: 0.0,
+                    roughness: 0.2,
+                    clearcoat: 0.4,
+                    clearcoatRoughness: 0.2,
+                    transmission: 0.1,
+                    reflectivity: 0.7
+                }
+            },
+            metal: {
+                type: 'MeshPhysicalMaterial',
+                properties: {
+                    metalness: 0.9,
+                    roughness: 0.2,
+                    clearcoat: 1.0,
+                    clearcoatRoughness: 0.1,
+                    reflectivity: 1.0,
+                    envMapIntensity: 1.0
+                }
+            },
+            carbonFiber: {
+                type: 'MeshPhysicalMaterial',
+                properties: {
+                    metalness: 0.4,
+                    roughness: 0.4,
+                    clearcoat: 1.0,
+                    clearcoatRoughness: 0.1,
+                    reflectivity: 0.7,
+                    sheen: 0.3,
+                    sheenRoughness: 0.3
+                }
+            }
+        };
+
+        function updateModelMaterial(materialType) {
+            if (!currentModel) return;
+            
+            const preset = materialPresets[materialType];
+            const color = document.getElementById('modelColor').value;
+            
+            let material;
+            if (preset.type === 'MeshPhysicalMaterial') {
+                material = new THREE.MeshPhysicalMaterial({
+                    ...preset.properties,
+                    color: color
+                });
+            } else {
+                material = new THREE.MeshBasicMaterial({
+                    ...preset.properties,
+                    color: color
+                });
+            }
+            
+            currentModel.material = material;
+            currentMaterialType = materialType;
+
+            // Update active state in menu
+            document.querySelectorAll('.material-option').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.material === materialType);
+            });
+        }
+
+        // Material menu toggle
+        materialBtn.addEventListener('click', () => {
+            materialMenu.classList.toggle('active');
+        });
+
+        // Close material menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!materialBtn.contains(e.target) && !materialMenu.contains(e.target)) {
+                materialMenu.classList.remove('active');
+            }
+        });
+
+        // Material option selection
+        document.querySelectorAll('.material-option').forEach(button => {
+            button.addEventListener('click', () => {
+                updateModelMaterial(button.dataset.material);
+                materialMenu.classList.remove('active');
+            });
+        });
+
+        // Update CSS variable for button highlights when model color changes
+        document.getElementById('modelColor').addEventListener('input', function(event) {
+            document.documentElement.style.setProperty('--model-color', `${event.target.value}33`);
+        });
 
         // Load default STL file if present
         loader.load(

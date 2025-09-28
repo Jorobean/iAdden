@@ -37,13 +37,14 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transform: scaleX(-1);
         }
 
         video::-webkit-media-controls {
             display: none !important;
         }
 
-        /* Mirror only in PiP mode */
+        /* Keep mirroring in PiP mode too */
         :picture-in-picture {
             transform: scaleX(-1);
         }

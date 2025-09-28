@@ -91,61 +91,49 @@
 
         #controls {
             position: fixed;
-            bottom: 20px;
+            bottom: calc(8px + var(--sab));
             left: 50%;
             transform: translateX(-50%);
             z-index: 100;
-            background-color: rgba(15, 15, 15, 0.95);
-            padding: 2px;
+            background-color: rgba(0, 0, 0, 0.65);
+            padding: 4px 8px;
             border-radius: 9999px;
             display: flex;
             flex-direction: row;
-            gap: 2px;
+            gap: 4px;
             align-items: center;
             width: fit-content;
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+            max-width: 95%;
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 0.5px solid rgba(255, 255, 255, 0.15);
         }
 
         button {
-            width: 45px;
-            height: 45px;
-            background-color: rgba(30, 30, 30, 0.8);
+            width: 32px;
+            height: 32px;
+            background-color: transparent;
             color: white;
             border: none;
             border-radius: 50%;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 0;
-            backdrop-filter: blur(5px);
         }
 
         button svg {
-            width: 18px;
-            height: 18px;
+            width: 16px;
+            height: 16px;
             fill: white;
+            opacity: 0.85;
             transition: all 0.2s ease;
-            filter: drop-shadow(0 0 1px rgba(0, 0, 0, 0.5));
         }
 
-        button {
-            width: 40px;
-            height: 40px;
-            background-color: rgba(30, 30, 30, 0.8);
-            color: white;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            backdrop-filter: blur(5px);
+        button:active {
+            background-color: rgba(255, 255, 255, 0.15);
         }
 
         button:hover {
@@ -156,6 +144,10 @@
         button.active {
             background-color: var(--model-color);
             opacity: 1;
+        }
+        
+        #autoRotate:not(.active):hover {
+            background-color: transparent;
         }
 
         button:hover svg, button.active svg {
@@ -194,6 +186,66 @@
             display: none;
         }
 
+        .color-menu {
+            position: absolute;
+            bottom: 100%;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(15, 15, 15, 0.95);
+            border-radius: 12px;
+            padding: 8px;
+            margin-bottom: 10px;
+            display: none;
+            flex-direction: column;
+            gap: 6px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            width: 180px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .color-menu.active {
+            display: flex;
+        }
+
+        .color-option {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 0 12px;
+            height: 40px;
+            min-height: 40px;
+            background: rgba(255, 255, 255, 0.08);
+            border: none;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+            white-space: nowrap;
+        }
+
+        .color-option:hover {
+            background: var(--model-color);
+            opacity: 0.7;
+        }
+
+        .color-option .label-text {
+            color: #ffffff;
+            font-size: 15px;
+            font-weight: 400;
+            letter-spacing: 0.3px;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            display: inline-block;
+            flex-grow: 1;
+            margin-left: 12px;
+        }
+
+        .color-option input[type="color"] {
+            margin: 0;
+            width: 28px;
+            height: 28px;
+            flex-shrink: 0;
+            order: -1;
+        }
+
         .axis-menu {
             position: absolute;
             bottom: 100%;
@@ -219,7 +271,7 @@
         .axis-option {
             padding: 8px;
             color: white;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
             border: none;
             border-radius: 6px;
             cursor: pointer;
@@ -239,7 +291,7 @@
         .material-option {
             padding: 0 12px;
             color: white;
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
             border: none;
             border-radius: 6px;
             cursor: pointer;
@@ -256,9 +308,7 @@
             align-items: center;
             height: 40px;
             min-height: 40px;
-        }
-
-        .material-option:hover {
+        }        .material-option:hover {
             background: var(--model-color);
             color: white;
             opacity: 0.7;
@@ -304,11 +354,25 @@
             background-color: var(--model-color);
         }
 
+        #screenshotButton {
+            position: fixed;
+            right: 8px;
+            bottom: calc(8px + var(--sab));
+            z-index: 99;
+            background-color: rgba(0, 0, 0, 0.65);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 0.5px solid rgba(255, 255, 255, 0.15);
+            border-radius: 9999px;
+            padding: 4px 8px;
+            height: 40px;
+        }
+
         input[type="color"] {
-            width: 36px;
-            height: 36px;
+            width: 28px;
+            height: 28px;
             border: none;
-            border-radius: 8px;
+            border-radius: 50%;
             cursor: pointer;
             padding: 0;
             margin: 2px;
@@ -383,12 +447,6 @@
     </div>
     <div id="controls">
         <div class="control-group">
-            <input type="color" id="bgColor" value="#1e1e1e" />
-        </div>
-        <div class="control-group">
-            <input type="color" id="modelColor" value="#00ff00" />
-        </div>
-        <div class="control-group">
             <input type="file" id="fileInput" accept=".stl" style="display: none;" />
             <button id="uploadButton" title="Upload STL" onclick="document.getElementById('fileInput').click();">
                 <svg viewBox="0 0 24 24">
@@ -396,17 +454,39 @@
                 </svg>
             </button>
         </div>
+        <div class="control-group color-picker-group">
+            <button id="colorPickerBtn" title="Change Colors">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 22C6.49 22 2 17.51 2 12S6.49 2 12 2s10 4.04 10 9c0 3.31-2.69 6-6 6h-1.77c-.28 0-.5.22-.5.5 0 .12.05.23.13.33.41.47.64 1.06.64 1.67A2.5 2.5 0 0 1 12 22zm0-18c-4.41 0-8 3.59-8 8s3.59 8 8 8c.28 0 .5-.22.5-.5a.54.54 0 0 0-.14-.35c-.41-.46-.63-1.05-.63-1.65a2.5 2.5 0 0 1 2.5-2.5H16c2.21 0 4-1.79 4-4 0-3.86-3.59-7-8-7z"/>
+                    <circle cx="6.5" cy="11.5" r="1.5"/>
+                    <circle cx="9.5" cy="7.5" r="1.5"/>
+                    <circle cx="14.5" cy="7.5" r="1.5"/>
+                    <circle cx="17.5" cy="11.5" r="1.5"/>
+                </svg>
+            </button>
+            <div class="color-menu" id="colorMenu">
+                <div class="color-option">
+                    <input type="color" id="bgColor" value="#1e1e1e" />
+                    <span class="label-text">Background</span>
+                </div>
+                <div class="color-option">
+                    <input type="color" id="modelColor" value="#00ff00" />
+                    <span class="label-text">Model</span>
+                </div>
+            </div>
+        </div>
         <div class="control-group" style="position: relative;">
             <button id="materialBtn" title="Change Material">
                 <svg viewBox="0 0 24 24">
-                    <path d="M3 6c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V6zm14 0c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-2c-1.1 0-2-.9-2-2V6zM3 16c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2v-2zm14 0c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-2c-1.1 0-2-.9-2-2v-2z"/>
+                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
                 </svg>
             </button>
         </div>
         <div class="control-group" style="position: relative;">
             <button id="axisSnapBtn" title="Snap to Axis">
                 <svg viewBox="0 0 24 24">
-                    <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                    <path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V5h14v14z"/>
+                    <path d="M7 7h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zM7 11h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2zM7 15h2v2H7zm4 0h2v2h-2zm4 0h2v2h-2z"/>
                 </svg>
             </button>
             <div class="axis-menu" id="axisMenu">
@@ -428,7 +508,7 @@
         <div class="control-group">
             <button id="resetCamera" title="Reset Camera">
                 <svg viewBox="0 0 24 24">
-                    <path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/>
+                    <path d="M12 7C6.48 7 2 9.24 2 12c0 2.24 2.94 4.13 7 4.77V20l4-4-4-4v3.73c-3.17-.56-5-1.81-5-2.73 0-1.06 3.04-3 8-3s8 1.94 8 3c0 .73-1.46 1.89-4 2.53v2.05c3.53-.77 6-2.53 6-4.58 0-2.76-4.48-5-10-5z"/>
                 </svg>
             </button>
         </div>
@@ -455,6 +535,13 @@
             </div>
         </div>
     </div>
+
+    <button id="screenshotButton" title="Take Screenshot">
+        <svg viewBox="0 0 24 24">
+            <path d="M12 8.8l-2.5 3.2h5L12 8.8zm0 0"/>
+            <path d="M9 3L7.17 5H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2h-3.17L15 3H9zm3 15c-2.76 0-5-2.24-5-5s2.24-5 5-5 5 2.24 5 5-2.24 5-5 5z"/>
+        </svg>
+    </button>
 
     <script type="importmap">
         {
@@ -749,6 +836,21 @@
             controls.update();
             renderer.render(scene, camera);
         }
+
+        // Color picker management
+        const colorPickerBtn = document.getElementById('colorPickerBtn');
+        const colorMenu = document.getElementById('colorMenu');
+
+        colorPickerBtn.addEventListener('click', () => {
+            colorMenu.classList.toggle('active');
+        });
+
+        // Close color menu when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!colorPickerBtn.contains(e.target) && !colorMenu.contains(e.target)) {
+                colorMenu.classList.remove('active');
+            }
+        });
 
         // Color preference management
         function loadColorPreferences() {
@@ -1116,6 +1218,69 @@
                 }
             );
         });
+
+        // Screenshot functionality
+        const screenshotButton = document.getElementById('screenshotButton');
+        
+        function takeScreenshot() {
+            // Temporarily hide controls
+            const controls = document.getElementById('controls');
+            const screenshotBtn = document.getElementById('screenshotButton');
+            controls.style.display = 'none';
+            screenshotBtn.style.display = 'none';
+            
+            // Render the scene
+            renderer.render(scene, camera);
+            
+            // Create a new canvas with only the WebGL content
+            const canvas = renderer.domElement;
+            
+            // Convert to blob
+            canvas.toBlob((blob) => {
+                // Show controls again
+                controls.style.display = 'flex';
+                screenshotBtn.style.display = 'flex';
+                
+                // For iOS, use specific API to save to photo library
+                if (navigator.userAgent.match(/(iPhone|iPod|iPad)/i)) {
+                    const url = URL.createObjectURL(blob);
+                    const img = new Image();
+                    img.onload = () => {
+                        // Create a canvas to draw the image
+                        const canvas = document.createElement('canvas');
+                        canvas.width = img.width;
+                        canvas.height = img.height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0);
+                        
+                        // Convert to base64 and save to photos
+                        const dataUrl = canvas.toDataURL('image/png');
+                        
+                        // Create invisible link for downloading
+                        const a = document.createElement('a');
+                        a.href = dataUrl;
+                        a.download = 'stl-model-screenshot.png';
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    };
+                    img.src = url;
+                } else {
+                    // For other platforms, trigger download
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'stl-model-screenshot.png';
+                    document.body.appendChild(a);
+                    a.click();
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(url);
+                }
+            }, 'image/png', 1.0);
+        }
+
+        screenshotButton.addEventListener('click', takeScreenshot);
 
         animate();
     </script>

@@ -67,14 +67,14 @@
             opacity: 1;
         }
         
-        /* Remove PiP mirroring since we're already mirroring the feed */
+        /* Ensure PiP video is also mirrored */
         video:picture-in-picture {
-            transform: none !important;
+            transform: scaleX(-1) !important;
         }
         
         @media all and (display-mode: picture-in-picture) {
             video {
-                transform: none !important;
+                transform: scaleX(-1) !important;
             }
         }
 
@@ -295,9 +295,12 @@
                         cameraVideo.play().catch(err => console.log('Playback prevented'));
                     });
                     
+                    // Ensure PiP window maintains mirroring
+                    document.pictureInPictureElement.style.transform = 'scaleX(-1)';
+                    
                     // Apply light overlay to PiP if it's active
-                    if (isLightOn && document.pictureInPictureElement) {
-                        document.pictureInPictureElement.style.filter = 'brightness(1.5)';
+                    if (isLightOn) {
+                        document.pictureInPictureElement.style.filter = 'brightness(1.5) saturate(1.1)';
                     }
 
                     // Ensure audio stays muted in PiP mode
@@ -355,9 +358,12 @@
             isLightOn = !isLightOn;
             setLightButtonActive(isLightOn);
             
-            // Only apply light effect to PiP window if active
+            // Apply light effect to main page
+            lightOverlay.classList.toggle('active', isLightOn);
+            
+            // Apply light effect to PiP window if active
             if (document.pictureInPictureElement) {
-                document.pictureInPictureElement.style.filter = isLightOn ? 'brightness(1.5)' : 'none';
+                document.pictureInPictureElement.style.filter = isLightOn ? 'brightness(1.5) saturate(1.1)' : 'none';
             }
         });
 

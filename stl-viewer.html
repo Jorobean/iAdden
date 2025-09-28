@@ -741,6 +741,13 @@
             autoRotateBtn.classList.toggle('active');
             controls.autoRotate = autoRotating;
             controls.autoRotateSpeed = 8.0; // Increased rotation speed
+            
+            // Reset camera up vector to default when enabling auto-rotation
+            if (autoRotating) {
+                camera.up.set(0, 1, 0);
+                camera.updateProjectionMatrix();
+                controls.update();
+            }
         });
 
         // Animation loop

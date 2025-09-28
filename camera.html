@@ -45,14 +45,14 @@
             display: none !important;
         }
         
-        /* PiP should face the same direction as main (no mirroring) */
+        /* PiP should also be mirrored like main video */
         video:picture-in-picture {
-            transform: scaleX(1) !important;
+            transform: scaleX(-1) !important;
         }
         
         @media all and (display-mode: picture-in-picture) {
             video {
-                transform: scaleX(1) !important;
+                transform: scaleX(-1) !important;
             }
         }
 
@@ -167,11 +167,11 @@
                 const constraints = {
                     video: {
                         facingMode: currentFacingMode,
-                        width: { min: 1920, ideal: 3840 },  // 4K support if available
-                        height: { min: 1080, ideal: 2160 },
-                        frameRate: { ideal: 60 },           // 60fps for smooth video
-                        aspectRatio: 16/9,                 // Maintain aspect ratio
-                        resizeMode: 'crop-and-scale'       // Ensure full coverage
+                        width: { min: 3840, ideal: 7680 },  // 8K support if available
+                        height: { min: 2160, ideal: 4320 },
+                        frameRate: { ideal: 120, min: 60 }, // 120fps for ultra smooth video
+                        aspectRatio: 16/9,                  // Maintain aspect ratio
+                        resizeMode: 'crop-and-scale'        // Ensure full coverage
                     },
                     audio: {
                         echoCancellation: false,           // Disable echo cancellation for mixing
@@ -179,7 +179,9 @@
                         autoGainControl: false,            // Disable auto gain for consistent levels
                         volume: 0.75,                      // Set mic volume to 75%
                         sampleRate: 48000,                 // High quality audio
-                        channelCount: 2                    // Stereo audio
+                        sampleSize: 24,                    // 24-bit audio depth
+                        channelCount: 2,                   // Stereo audio
+                        latency: 0                         // Minimum latency
                     }
                 };
 
@@ -187,9 +189,9 @@
                 const ensureHighQuality = async (track) => {
                     const capabilities = track.getCapabilities();
                     const settings = {
-                        width: Math.min(capabilities.width?.max || 3840, 3840),
-                        height: Math.min(capabilities.height?.max || 2160, 2160),
-                        frameRate: Math.min(capabilities.frameRate?.max || 60, 60),
+                        width: Math.min(capabilities.width?.max || 7680, 7680),  // Up to 8K width
+                        height: Math.min(capabilities.height?.max || 4320, 4320), // Up to 8K height
+                        frameRate: Math.min(capabilities.frameRate?.max || 120, 120), // Up to 120fps
                         resizeMode: 'crop-and-scale'
                     };
                     await track.applyConstraints(settings);
@@ -211,19 +213,29 @@
                         volume: 0.75,
                         echoCancellation: false,
                         noiseSuppression: false,
-                        autoGainControl: false
+                        autoGainControl: false,
+                        sampleRate: 48000,
+                        sampleSize: 24,
+                        latency: 0
                     });
                 }
 
                 cameraVideo.srcObject = stream;
                 
-                // Set video element properties - keep muted for UI but allow audio track for recording
+                // Set video element properties - ensure it's the primary video for PiP
                 cameraVideo.setAttribute('playsinline', true);
                 cameraVideo.setAttribute('webkit-playsinline', true);
                 cameraVideo.style.objectFit = 'cover';
                 
+                // Mark this video as the preferred PiP source
+                cameraVideo.setAttribute('data-pip-source', 'camera');
+                cameraVideo.disablePictureInPicture = false;
+                
                 // Mute the video element to prevent feedback but keep audio track active
                 cameraVideo.muted = true;
+                
+                // Ensure video starts playing immediately
+                await cameraVideo.play();
 
                 // Hide PiP button if not supported
                 if (!document.pictureInPictureEnabled) {
@@ -253,8 +265,8 @@
                         cameraVideo.play().catch(err => console.log('Playback prevented'));
                     });
                     
-                    // Make PiP face the same direction as main (remove mirroring)
-                    document.pictureInPictureElement.style.transform = 'scaleX(1)';
+                    // Make PiP mirrored like main video
+                    document.pictureInPictureElement.style.transform = 'scaleX(-1)';
 
                     // Ensure audio stays muted in PiP mode
                     document.pictureInPictureElement.muted = true;
@@ -285,7 +297,7 @@
         if ('mediaSession' in navigator) {
             // Don't set any action handlers to avoid conflicts with other media
             navigator.mediaSession.metadata = new MediaMetadata({
-                title: 'Camera',
+                title: 'Camera Feed',
                 artist: 'Background Recording',
                 artwork: []
             });
@@ -293,10 +305,12 @@
 
         // Prevent video from pausing when other media starts
         cameraVideo.addEventListener('pause', (event) => {
-            // Always try to resume playback
-            setTimeout(() => {
-                cameraVideo.play().catch(err => console.log('Playback prevented:', err));
-            }, 100);
+            // Only auto-resume if this is the camera video and not user-initiated
+            if (cameraVideo.srcObject && cameraVideo.srcObject.getVideoTracks().length > 0) {
+                setTimeout(() => {
+                    cameraVideo.play().catch(err => console.log('Camera playback prevented:', err));
+                }, 200);
+            }
         });
 
         // Initialize on load

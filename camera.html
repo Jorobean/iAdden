@@ -203,7 +203,14 @@
                         aspectRatio: 16/9,                 // Maintain aspect ratio
                         resizeMode: 'crop-and-scale'       // Ensure full coverage
                     },
-                    audio: false  // Disable audio track completely
+                    audio: {
+                        echoCancellation: false,           // Disable echo cancellation for mixing
+                        noiseSuppression: false,           // Disable noise suppression for natural sound
+                        autoGainControl: false,            // Disable auto gain for consistent levels
+                        volume: 0.75,                      // Set mic volume to 75%
+                        sampleRate: 48000,                 // High quality audio
+                        channelCount: 2                    // Stereo audio
+                    }
                 };
 
                 // Function to ensure highest quality
@@ -226,12 +233,27 @@
                     await ensureHighQuality(videoTrack);
                 }
 
+                // Configure audio track for screen recording with mixing
+                const audioTrack = stream.getAudioTracks()[0];
+                if (audioTrack) {
+                    // Set microphone volume to 75% for mixing with device audio
+                    await audioTrack.applyConstraints({
+                        volume: 0.75,
+                        echoCancellation: false,
+                        noiseSuppression: false,
+                        autoGainControl: false
+                    });
+                }
+
                 cameraVideo.srcObject = stream;
                 
-                // Set video element properties for better quality
+                // Set video element properties - keep muted for UI but allow audio track for recording
                 cameraVideo.setAttribute('playsinline', true);
                 cameraVideo.setAttribute('webkit-playsinline', true);
                 cameraVideo.style.objectFit = 'cover';
+                
+                // Mute the video element to prevent feedback but keep audio track active
+                cameraVideo.muted = true;
 
                 // Hide PiP button if not supported
                 if (!document.pictureInPictureEnabled) {
@@ -294,11 +316,18 @@
                 Picture in Picture`;
         });
 
-        // Handle media session
+        // Handle media session to allow audio mixing
         if ('mediaSession' in navigator) {
             navigator.mediaSession.setActionHandler('pause', () => {
-                // Prevent default pause behavior
+                // Prevent default pause behavior to maintain audio mixing
                 cameraVideo.play().catch(err => console.log('Playback prevented'));
+            });
+            
+            // Set media session metadata for better iOS integration
+            navigator.mediaSession.metadata = new MediaMetadata({
+                title: 'Camera Audio',
+                artist: 'Screen Recording Mix',
+                artwork: []
             });
         }
 

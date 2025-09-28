@@ -641,24 +641,46 @@
 
             const mesh = new THREE.Mesh(geometry, material);
             
-            // Center the model
+            // Center the model properly
             geometry.computeBoundingBox();
+            const boundingBox = new THREE.Box3().setFromObject(mesh);
             const center = new THREE.Vector3();
-            geometry.boundingBox.getCenter(center);
-            geometry.center();
+            boundingBox.getCenter(center);
+            
+            // Move geometry to origin
+            geometry.translate(-center.x, -center.y, -center.z);
             
             // Scale model to fit view
-            const boundingBox = new THREE.Box3().setFromObject(mesh);
             const size = boundingBox.getSize(new THREE.Vector3());
             const maxDim = Math.max(size.x, size.y, size.z);
             const scale = 5 / maxDim;
             mesh.scale.multiplyScalar(scale);
+            
+            // Ensure the model's position is at origin
+            mesh.position.set(0, 0, 0);
 
             currentModel = mesh;
             scene.add(currentModel);
 
-            // Reset camera position
-            resetCamera();
+            // Set up camera and controls for proper rotation
+            const modelBoundingBox = new THREE.Box3().setFromObject(mesh);
+            const modelCenter = new THREE.Vector3();
+            modelBoundingBox.getCenter(modelCenter);
+            
+            // Set controls target to model center
+            controls.target.copy(modelCenter);
+            
+            // Position camera relative to model center
+            const distance = modelBoundingBox.getSize(new THREE.Vector3()).length() * 1.5;
+            camera.position.set(
+                modelCenter.x + distance,
+                modelCenter.y + distance,
+                modelCenter.z + distance
+            );
+            
+            camera.lookAt(modelCenter);
+            camera.updateProjectionMatrix();
+            controls.update();
             
             // Hide loading indicator
             hideLoading();
@@ -755,8 +777,22 @@
                 const center = new THREE.Vector3();
                 boundingBox.getCenter(center);
                 
-                camera.position.set(center.x + 5, center.y + 5, center.z + 5);
+                // Calculate proper camera distance based on model size
+                const size = boundingBox.getSize(new THREE.Vector3());
+                const maxDim = Math.max(size.x, size.y, size.z);
+                const distance = maxDim * 2;
+                
+                // Position camera at an isometric view
+                camera.position.set(
+                    center.x + distance,
+                    center.y + distance,
+                    center.z + distance
+                );
+                
+                // Ensure controls target is at model center
                 controls.target.copy(center);
+                camera.lookAt(center);
+                camera.updateProjectionMatrix();
                 controls.update();
             }
         }

@@ -50,16 +50,16 @@
 
         @media (max-width: 768px) {
             #controls {
-                padding: 2px;
-                gap: 2px;
+                padding: 6px 16px;
+                gap: 8px;
                 flex-wrap: nowrap;
                 justify-content: center;
                 width: auto;
-                max-width: calc(100% - 20px);
+                max-width: calc(100% - 90px);
             }
 
             .control-group {
-                gap: 2px;
+                gap: 8px;
             }
 
             button {
@@ -91,27 +91,27 @@
 
         #controls {
             position: fixed;
-            bottom: calc(8px + var(--sab));
+            bottom: calc(16px + var(--sab));
             left: 50%;
             transform: translateX(-50%);
             z-index: 100;
-            background-color: rgba(0, 0, 0, 0.65);
-            padding: 4px 8px;
-            border-radius: 9999px;
+            background-color: rgba(0, 0, 0, 0.7);
+            padding: 6px 16px;
+            border-radius: 16px;
             display: flex;
             flex-direction: row;
-            gap: 4px;
+            gap: 8px;
             align-items: center;
             width: fit-content;
-            max-width: 95%;
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 0.5px solid rgba(255, 255, 255, 0.15);
+            max-width: calc(100% - 140px);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 0.5px solid rgba(255, 255, 255, 0.2);
         }
 
         button {
-            width: 32px;
-            height: 32px;
+            width: 36px;
+            height: 36px;
             background-color: transparent;
             color: white;
             border: none;
@@ -121,7 +121,7 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0;
+            padding: 8px;
         }
 
         button svg {
@@ -356,16 +356,20 @@
 
         #screenshotButton {
             position: fixed;
-            right: 8px;
-            bottom: calc(8px + var(--sab));
+            right: 16px;
+            bottom: calc(16px + var(--sab));
             z-index: 99;
-            background-color: rgba(0, 0, 0, 0.65);
-            backdrop-filter: blur(20px) saturate(180%);
-            -webkit-backdrop-filter: blur(20px) saturate(180%);
-            border: 0.5px solid rgba(255, 255, 255, 0.15);
-            border-radius: 9999px;
-            padding: 4px 8px;
-            height: 40px;
+            background-color: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(30px) saturate(180%);
+            -webkit-backdrop-filter: blur(30px) saturate(180%);
+            border: 0.5px solid rgba(255, 255, 255, 0.2);
+            border-radius: 16px;
+            padding: 6px 16px;
+            width: 48px;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
 
         input[type="color"] {

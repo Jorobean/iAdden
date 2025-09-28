@@ -37,38 +37,15 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transform: scaleX(-1);
         }
 
         video::-webkit-media-controls {
             display: none !important;
         }
 
-        /* Light overlay for PiP */
-        .light-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.85);
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            -webkit-user-select: none;
-            user-select: none;
-            -webkit-backdrop-filter: brightness(1.5);
-            backdrop-filter: brightness(1.5);
-            mix-blend-mode: screen;
-        }
 
-        .light-overlay.active {
-            opacity: 1;
-        }
         
         /* PiP mirroring for all browsers */
-        video::-webkit-media-controls-container,
-        video::-webkit-media-controls-start-playback-button,
         video:picture-in-picture {
             transform: scaleX(-1) !important;
         }
@@ -152,6 +129,7 @@
 
         .light-button.active svg {
             fill: #FFD700;
+            opacity: 1;
         }
 
         .pip-button, .light-button {
@@ -210,7 +188,6 @@
             </button>
             </div>
         </div>
-        <div class="light-overlay" id="lightOverlay"></div>
     </div>
 
     <script>
@@ -351,10 +328,9 @@
 
         lightBtn.addEventListener('click', () => {
             isLightOn = !isLightOn;
-            lightOverlay.classList.toggle('active', isLightOn);
-            setLightButtonActive(isLightOn);
+            lightBtn.classList.toggle('active', isLightOn);
             
-            // Apply light effect to PiP window if active
+            // Only apply light effect to PiP window
             if (document.pictureInPictureElement) {
                 document.pictureInPictureElement.style.filter = isLightOn ? 'brightness(1.5)' : 'none';
             }

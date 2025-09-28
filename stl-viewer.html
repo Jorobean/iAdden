@@ -235,6 +235,7 @@
             border-radius: 6px;
             transition: all 0.3s ease;
             white-space: nowrap;
+            cursor: pointer;
         }
 
         .color-option:hover {
@@ -251,6 +252,9 @@
             display: inline-block;
             flex-grow: 1;
             margin-left: 12px;
+            cursor: pointer;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
         }
 
         .color-option input[type="color"] {
@@ -486,11 +490,11 @@
             <div class="color-menu" id="colorMenu">
                 <div class="color-option">
                     <input type="color" id="bgColor" value="#1e1e1e" />
-                    <span class="label-text">Background</span>
+                    <label for="bgColor" class="label-text">Background</label>
                 </div>
                 <div class="color-option">
                     <input type="color" id="modelColor" value="#00ff00" />
-                    <span class="label-text">Model</span>
+                    <label for="modelColor" class="label-text">Model</label>
                 </div>
             </div>
         </div>

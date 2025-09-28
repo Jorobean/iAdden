@@ -403,20 +403,6 @@
                 </svg>
             </button>
         </div>
-        <div class="control-group">
-            <button id="resetCamera" title="Reset Camera">
-                <svg viewBox="0 0 24 24">
-                    <path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/>
-                </svg>
-            </button>
-        </div>
-        <div class="control-group">
-            <button id="autoRotate" title="Auto Rotate">
-                <svg viewBox="0 0 24 24">
-                    <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
-                </svg>
-            </button>
-        </div>
         <div class="control-group" style="position: relative;">
             <button id="axisSnapBtn" title="Snap to Axis">
                 <svg viewBox="0 0 24 24">
@@ -431,6 +417,27 @@
                 <button class="axis-option" data-axis="z">+Z</button>
                 <button class="axis-option" data-axis="-z">-Z</button>
             </div>
+        </div>
+        <div class="control-group">
+            <button id="resetCamera" title="Reset Camera">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 6v3l4-4-4-4v3c-4.42 0-8 3.58-8 8 0 1.57.46 3.03 1.24 4.26L6.7 14.8c-.45-.83-.7-1.79-.7-2.8 0-3.31 2.69-6 6-6zm6.76 1.74L17.3 9.2c.44.84.7 1.79.7 2.8 0 3.31-2.69 6-6 6v-3l-4 4 4 4v-3c4.42 0 8-3.58 8-8 0-1.57-.46-3.03-1.24-4.26z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="control-group">
+            <button id="autoRotate" title="Auto Rotate">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 4V1L8 5l4 4V6c3.31 0 6 2.69 6 6 0 1.01-.25 1.97-.7 2.8l1.46 1.46C19.54 15.03 20 13.57 20 12c0-4.42-3.58-8-8-8zm0 14c-3.31 0-6-2.69-6-6 0-1.01.25-1.97.7-2.8L5.24 7.74C4.46 8.97 4 10.43 4 12c0 4.42 3.58 8 8 8v3l4-4-4-4v3z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="control-group">
+            <button id="clearModel" title="Clear Model">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12 19 6.41z"/>
+                </svg>
+            </button>
         </div>
             <div class="material-menu" id="materialMenu">
                 <button class="material-option" data-material="foamyTPU">Foamy TPU</button>
@@ -521,50 +528,102 @@
             loadingIndicator.style.display = 'none';
         }
 
+        // Function to save uploaded STL file
+        function saveSTLFile(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64data = e.target.result;
+                localStorage.setItem('lastUploadedSTL', base64data);
+                localStorage.setItem('lastSTLName', file.name);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Function to load and display STL file
+        function loadAndDisplaySTL(geometry) {
+            // Remove existing model if present
+            if (currentModel) {
+                scene.remove(currentModel);
+            }
+
+            const preset = materialPresets[currentMaterialType];
+            const material = new THREE[preset.type === 'MeshPhysicalMaterial' ? 'MeshPhysicalMaterial' : 'MeshBasicMaterial']({
+                ...preset.properties,
+                color: document.getElementById('modelColor').value
+            });
+
+            const mesh = new THREE.Mesh(geometry, material);
+            
+            // Center the model
+            geometry.computeBoundingBox();
+            const center = new THREE.Vector3();
+            geometry.boundingBox.getCenter(center);
+            geometry.center();
+            
+            // Scale model to fit view
+            const boundingBox = new THREE.Box3().setFromObject(mesh);
+            const size = boundingBox.getSize(new THREE.Vector3());
+            const maxDim = Math.max(size.x, size.y, size.z);
+            const scale = 5 / maxDim;
+            mesh.scale.multiplyScalar(scale);
+
+            currentModel = mesh;
+            scene.add(currentModel);
+
+            // Reset camera position
+            resetCamera();
+            
+            // Hide loading indicator
+            hideLoading();
+        }
+
+        // File persistence functions
+        function saveFileToStorage(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64data = e.target.result.split(',')[1];
+                localStorage.setItem('stlViewerFile', base64data);
+                localStorage.setItem('stlViewerFileName', file.name);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function loadFileFromStorage() {
+            const base64data = localStorage.getItem('stlViewerFile');
+            if (!base64data) return null;
+
+            const binary = atob(base64data);
+            const bytes = new Uint8Array(binary.length);
+            for (let i = 0; i < binary.length; i++) {
+                bytes[i] = binary.charCodeAt(i);
+            }
+            return new Blob([bytes.buffer], { type: 'model/stl' });
+        }
+
         // Handle file input
         document.getElementById('fileInput').addEventListener('change', function(event) {
             showLoading();
             const file = event.target.files[0];
             if (file) {
+                saveFileToStorage(file);
                 const reader = new FileReader();
                 reader.onload = function(e) {
                     loader.load(
                         URL.createObjectURL(file),
                         function(geometry) {
-                            // Remove existing model if present
-                            if (currentModel) {
-                                scene.remove(currentModel);
-                            }
-
-                            const preset = materialPresets[currentMaterialType];
-                            const material = new THREE[preset.type === 'MeshPhysicalMaterial' ? 'MeshPhysicalMaterial' : 'MeshBasicMaterial']({
-                                ...preset.properties,
-                                color: document.getElementById('modelColor').value
-                            });
-
-                            const mesh = new THREE.Mesh(geometry, material);
-                            
-                            // Center the model
-                            geometry.computeBoundingBox();
-                            const center = new THREE.Vector3();
-                            geometry.boundingBox.getCenter(center);
-                            geometry.center();
-                            
-                            // Scale model to fit view
-                            const boundingBox = new THREE.Box3().setFromObject(mesh);
-                            const size = boundingBox.getSize(new THREE.Vector3());
-                            const maxDim = Math.max(size.x, size.y, size.z);
-                            const scale = 5 / maxDim;
-                            mesh.scale.multiplyScalar(scale);
-
-                            currentModel = mesh;
-                            scene.add(currentModel);
-
-                            // Reset camera position
-                            resetCamera();
-                            
-                            // Hide loading indicator
+                            loadAndDisplaySTL(geometry);
+                            saveSTLFile(file);
+                        },
+                        (xhr) => {
+                            console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+                        },
+                        (error) => {
+                            console.error('Error loading STL:', error);
                             hideLoading();
+                        }
+                    );
+                };
+                reader.readAsArrayBuffer(file);
                         },
                         (xhr) => {
                             console.log((xhr.loaded / xhr.total * 100) + '% loaded');
@@ -929,9 +988,12 @@
             document.documentElement.style.setProperty('--model-color', `${event.target.value}33`);
         });
 
-        // Load default STL file if present
+        // Load saved or default STL file
+        const savedFile = loadFileFromStorage();
+        const fileToLoad = savedFile ? URL.createObjectURL(savedFile) : 'cube.stl';
+
         loader.load(
-            'cube.stl',
+            fileToLoad,
             function(geometry) {
                 const material = new THREE.MeshPhongMaterial({
                     color: document.getElementById('modelColor').value,
@@ -1020,6 +1082,49 @@
                 snapToAxis(button.dataset.axis);
                 axisMenu.classList.remove('active');
             });
+        });
+
+        // Clear model handler
+        document.getElementById('clearModel').addEventListener('click', () => {
+            if (currentModel) {
+                scene.remove(currentModel);
+                currentModel = null;
+            }
+            localStorage.removeItem('stlViewerFile');
+            localStorage.removeItem('stlViewerFileName');
+
+            // Load default cube
+            loader.load('cube.stl',
+                function(geometry) {
+                    const material = new THREE.MeshPhongMaterial({
+                        color: document.getElementById('modelColor').value,
+                        specular: 0x111111,
+                        shininess: 200
+                    });
+
+                    const mesh = new THREE.Mesh(geometry, material);
+                    geometry.computeBoundingBox();
+                    const center = new THREE.Vector3();
+                    geometry.boundingBox.getCenter(center);
+                    geometry.center();
+                    
+                    const boundingBox = new THREE.Box3().setFromObject(mesh);
+                    const size = boundingBox.getSize(new THREE.Vector3());
+                    const maxDim = Math.max(size.x, size.y, size.z);
+                    const scale = 5 / maxDim;
+                    mesh.scale.multiplyScalar(scale);
+
+                    currentModel = mesh;
+                    scene.add(currentModel);
+                    resetCamera();
+                },
+                (xhr) => {
+                    console.log((xhr.loaded / xhr.total * 100) + '% loaded');
+                },
+                (error) => {
+                    console.error('Error loading default STL:', error);
+                }
+            );
         });
 
         animate();

@@ -1,17 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Screen & Camera Recorder</title>
+        <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <title>Camera</title>
     <style>
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            padding: 0;
+            font-family: -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background: #000;
             color: white;
             height: 100vh;
+            width: 100vw;
             overflow: hidden;
+            position: fixed;
         }
 
         .container {
@@ -204,7 +208,6 @@
     </div>
 
     <div class="container">
-        <h1>Screen & Camera Recorder</h1>
         
         <div class="video-container">
             <video id="cameraVideo" autoplay playsinline muted></video>
@@ -407,20 +410,33 @@
             consentModal.style.display = 'none';
             try {
                 // Request camera permission
-                cameraStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { 
+                // Check if running on iOS
+                const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+                
+                // Set constraints based on device
+                const constraints = {
+                    video: {
                         facingMode: currentFacingMode,
-                        width: { ideal: 3840 }, // 4K
-                        height: { ideal: 2160 },
-                        frameRate: { ideal: 60 }
+                        width: isIOS ? { min: 640, ideal: 1280, max: 1920 } : { ideal: 1920 },
+                        height: isIOS ? { min: 480, ideal: 720, max: 1080 } : { ideal: 1080 }
                     },
                     audio: {
                         echoCancellation: true,
                         noiseSuppression: true,
-                        sampleRate: 48000,
-                        channelCount: 2
+                        sampleRate: 44100
                     }
-                });
+                };
+
+                cameraStream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                // Ensure video track is active
+                const videoTrack = cameraStream.getVideoTracks()[0];
+                if (videoTrack) {
+                    await videoTrack.applyConstraints({
+                        width: isIOS ? { min: 640, ideal: 1280, max: 1920 } : { ideal: 1920 },
+                        height: isIOS ? { min: 480, ideal: 720, max: 1080 } : { ideal: 1080 }
+                    });
+                }
                 cameraVideo.srcObject = cameraStream;
                 permissionBanner.classList.remove('active');
 

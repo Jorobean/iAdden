@@ -197,9 +197,9 @@
         }
 
         button:hover {
-            background-color: #1976D2;
+            background-color: var(--model-color);
             transform: translateY(-1px);
-            box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
         }
 
         button:active {
@@ -222,7 +222,7 @@
         }
 
         button:hover {
-            background-color: #45a049;
+            background-color: var(--model-color);
         }
 
         input[type="color"] {
@@ -317,6 +317,13 @@
                 </svg>
             </button>
         </div>
+        <div class="control-group" style="position: relative;">
+            <button id="materialBtn" title="Change Material">
+                <svg viewBox="0 0 24 24">
+                    <path d="M3 6c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V6zm14 0c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-2c-1.1 0-2-.9-2-2V6zM3 16c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2v-2zm14 0c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-2c-1.1 0-2-.9-2-2v-2z"/>
+                </svg>
+            </button>
+        </div>
         <div class="control-group">
             <button id="resetCamera" title="Reset Camera">
                 <svg viewBox="0 0 24 24">
@@ -331,12 +338,6 @@
                 </svg>
             </button>
         </div>
-        <div class="control-group" style="position: relative;">
-            <button id="materialBtn" title="Change Material">
-                <svg viewBox="0 0 24 24">
-                    <path d="M3 6c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2V6zm14 0c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-2c-1.1 0-2-.9-2-2V6zM3 16c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2H5c-1.1 0-2-.9-2-2v-2zm14 0c0-1.1.9-2 2-2h2c1.1 0 2 .9 2 2v2c0 1.1-.9 2-2 2h-2c-1.1 0-2-.9-2-2v-2z"/>
-                </svg>
-            </button>
             <div class="material-menu" id="materialMenu">
                 <button class="material-option" data-material="foamyTPU">Foamy TPU</button>
                 <button class="material-option" data-material="regularTPU">Regular TPU</button>

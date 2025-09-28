@@ -771,31 +771,61 @@
 
         // Mobile touch support
         function setupTouchControls() {
-            let touchStartX = 0;
-            let touchStartY = 0;
+            let lastTouchX = 0;
+            let lastTouchY = 0;
+            let velocityX = 0;
+            let velocityY = 0;
             let isDragging = false;
+            let lastTime = 0;
+            let inertiaFrame;
+
+            function applyInertia() {
+                velocityX *= 0.95;
+                velocityY *= 0.95;
+                if (Math.abs(velocityX) > 0.01 || Math.abs(velocityY) > 0.01) {
+                    controls.rotateLeft(velocityX * 0.008);
+                    controls.rotateUp(velocityY * 0.008);
+                    inertiaFrame = requestAnimationFrame(applyInertia);
+                } else {
+                    velocityX = 0;
+                    velocityY = 0;
+                    inertiaFrame = null;
+                }
+            }
 
             container.addEventListener('touchstart', (e) => {
                 const touch = e.touches[0];
-                touchStartX = touch.clientX;
-                touchStartY = touch.clientY;
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
                 isDragging = true;
+                lastTime = performance.now();
+                if (inertiaFrame) {
+                    cancelAnimationFrame(inertiaFrame);
+                    inertiaFrame = null;
+                }
             }, { passive: true });
 
             container.addEventListener('touchmove', (e) => {
                 if (!isDragging) return;
                 const touch = e.touches[0];
-                const deltaX = touch.clientX - touchStartX;
-                const deltaY = touch.clientY - touchStartY;
+                const now = performance.now();
+                const dt = Math.max(now - lastTime, 16);
+                const deltaX = touch.clientX - lastTouchX;
+                const deltaY = touch.clientY - lastTouchY;
 
-                touchStartX = touch.clientX;
-                touchStartY = touch.clientY;
+                // Increase sensitivity for mobile
+                controls.rotateLeft(deltaX * 0.012);
+                controls.rotateUp(deltaY * 0.012);
 
-                if (e.touches.length === 1) {
-                    // Rotate
-                    controls.rotateLeft(deltaX * 0.005);
-                    controls.rotateUp(deltaY * 0.005);
-                } else if (e.touches.length === 2) {
+                // Calculate velocity for inertia
+                velocityX = deltaX / dt * 16;
+                velocityY = deltaY / dt * 16;
+
+                lastTouchX = touch.clientX;
+                lastTouchY = touch.clientY;
+                lastTime = now;
+
+                if (e.touches.length === 2) {
                     // Pinch to zoom
                     const touch2 = e.touches[1];
                     const dist = Math.hypot(
@@ -808,6 +838,9 @@
 
             container.addEventListener('touchend', () => {
                 isDragging = false;
+                if (!inertiaFrame && (Math.abs(velocityX) > 0.01 || Math.abs(velocityY) > 0.01)) {
+                    inertiaFrame = requestAnimationFrame(applyInertia);
+                }
             }, { passive: true });
         }
 

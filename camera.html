@@ -45,13 +45,14 @@
             display: none !important;
         }
         
-        /* PiP should also be mirrored like main video */
-        video:picture-in-picture {
+        /* PiP mirroring styles */
+        :picture-in-picture #cameraVideo,
+        #cameraVideo:picture-in-picture {
             transform: scaleX(-1) !important;
         }
-        
+
         @media all and (display-mode: picture-in-picture) {
-            video {
+            #cameraVideo {
                 transform: scaleX(-1) !important;
             }
         }
@@ -264,9 +265,13 @@
                         cameraVideo.muted = true;
                         cameraVideo.play().catch(err => console.log('Playback prevented'));
                     });
-                    
-                    // Make PiP mirrored like main video
-                    document.pictureInPictureElement.style.transform = 'scaleX(-1)';
+
+                    // Apply mirroring to PiP window
+                    if (document.pictureInPictureElement) {
+                        document.pictureInPictureElement.style.transform = 'scaleX(-1)';
+                        // Force a repaint to ensure mirroring is applied
+                        document.pictureInPictureElement.style.transform = 'scaleX(-1)';
+                    }
 
                     // Ensure audio stays muted in PiP mode
                     document.pictureInPictureElement.muted = true;

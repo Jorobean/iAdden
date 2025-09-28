@@ -512,6 +512,19 @@
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
+        controls.minPolarAngle = -Infinity;
+        controls.maxPolarAngle = Infinity;
+        controls.enableRotate = true;
+        controls.rotateSpeed = 1.0;
+        controls.enablePan = false;
+        controls.noPan = true;
+        controls.minPolarAngle = 0;
+        controls.maxPolarAngle = Math.PI;
+        controls.minAzimuthAngle = -Infinity;
+        controls.maxAzimuthAngle = Infinity;
+        controls.enableRotate = true;
+        controls.rotateSpeed = 0.5;
+        controls.enablePan = false;
 
         // Variables for model
         let currentModel = null;
@@ -705,9 +718,25 @@
                 touchStartY = touch.clientY;
 
                 if (e.touches.length === 1) {
-                    // Rotate
-                    controls.rotateLeft(deltaX * 0.005);
-                    controls.rotateUp(deltaY * 0.005);
+                    // Calculate rotation angles
+                    const rotationSpeed = 0.005;
+                    const phi = -deltaY * rotationSpeed;
+                    const theta = -deltaX * rotationSpeed;
+
+                    // Apply rotation directly to camera position
+                    const radius = camera.position.distanceTo(controls.target);
+                    const currentPhi = Math.acos(camera.position.y / radius);
+                    const currentTheta = Math.atan2(camera.position.z, camera.position.x);
+
+                    const newPhi = currentPhi + phi;
+                    const newTheta = currentTheta + theta;
+
+                    camera.position.x = radius * Math.sin(newPhi) * Math.cos(newTheta);
+                    camera.position.y = radius * Math.cos(newPhi);
+                    camera.position.z = radius * Math.sin(newPhi) * Math.sin(newTheta);
+
+                    camera.lookAt(controls.target);
+                    controls.update();
                 } else if (e.touches.length === 2) {
                     // Pinch to zoom
                     const touch2 = e.touches[1];
@@ -741,13 +770,6 @@
             autoRotateBtn.classList.toggle('active');
             controls.autoRotate = autoRotating;
             controls.autoRotateSpeed = 8.0; // Increased rotation speed
-            
-            // Reset camera up vector to default when enabling auto-rotation
-            if (autoRotating) {
-                camera.up.set(0, 1, 0);
-                camera.updateProjectionMatrix();
-                controls.update();
-            }
         });
 
         // Animation loop

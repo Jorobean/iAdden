@@ -207,7 +207,7 @@
         <h1>Screen & Camera Recorder</h1>
         
         <div class="video-container">
-            <video id="cameraVideo" autoplay playsinline></video>
+            <video id="cameraVideo" autoplay playsinline muted></video>
             <div class="camera-controls">
                 <button id="recordBtn" class="control-btn">
                     <svg viewBox="0 0 24 24">
@@ -255,6 +255,7 @@
         let mediaRecorder;
         let recordedChunks = [];
         let isRecording = false;
+        let screenStream;
 
         const cameraVideo = document.getElementById('cameraVideo');
         const flipCameraBtn = document.getElementById('flipCameraBtn');
@@ -265,22 +266,84 @@
         const declineBtn = document.getElementById('declineBtn');
         const permissionBanner = document.querySelector('.permission-banner');
 
-        // Recording functionality with MP4 support
-        recordBtn.addEventListener('click', async () => {
+        // Recording functionality with MP4 support and screen capture
+        recordBtn.addEventListener('click', async function() {
             if (isRecording) {
                 mediaRecorder.stop();
                 recordBtn.classList.remove('recording');
+                if (screenStream) {
+                    screenStream.getTracks().forEach(track => track.stop());
+                }
             } else {
-                recordedChunks = [];
-                const stream = cameraVideo.srcObject;
-                
-                // Try to use H.264 codec for maximum compatibility
-                const mimeType = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
-                const options = {
-                    mimeType: MediaRecorder.isTypeSupported(mimeType) ? mimeType : 'video/webm',
-                    videoBitsPerSecond: 8000000, // 8 Mbps for high quality
-                    audioBitsPerSecond: 128000   // 128 kbps audio
-                };
+                try {
+                    // Get screen capture stream
+                    screenStream = await navigator.mediaDevices.getDisplayMedia({
+                        video: {
+                            width: { ideal: 1920 },
+                            height: { ideal: 1080 },
+                            frameRate: { ideal: 60 }
+                        },
+                        audio: true
+                    });
+
+                    // Get all tracks
+                    const videoTrack = screenStream.getVideoTracks()[0];
+                    const audioTrack = cameraVideo.srcObject.getAudioTracks()[0];
+                    
+                    // Combine screen video with camera audio
+                    const combinedStream = new MediaStream([
+                        videoTrack,
+                        audioTrack
+                    ]);
+
+                    recordedChunks = [];
+                    
+                    // Try to use H.264 codec for maximum compatibility
+                    const mimeType = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
+                    const options = {
+                        mimeType: MediaRecorder.isTypeSupported(mimeType) ? mimeType : 'video/webm',
+                        videoBitsPerSecond: 8000000, // 8 Mbps for high quality
+                        audioBitsPerSecond: 128000   // 128 kbps audio
+                    };
+
+                    try {
+                        mediaRecorder = new MediaRecorder(combinedStream, options);
+                    } catch (e) {
+                        console.warn('Failed to create MediaRecorder with preferred options, falling back to default', e);
+                        mediaRecorder = new MediaRecorder(combinedStream);
+                    }
+                    
+                    mediaRecorder.ondataavailable = (e) => {
+                        if (e.data.size > 0) recordedChunks.push(e.data);
+                    };
+
+                    mediaRecorder.onstop = async () => {
+                        const blob = new Blob(recordedChunks, { type: 'video/mp4' });
+                        
+                        // Create a timestamp for the filename
+                        const date = new Date();
+                        const timestamp = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}_${date.getHours().toString().padStart(2,'0')}-${date.getMinutes().toString().padStart(2,'0')}`;
+                        
+                        const url = URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = `screen-recording_${timestamp}.mp4`;
+                        document.body.appendChild(a);
+                        a.click();
+                        document.body.removeChild(a);
+                        URL.revokeObjectURL(url);
+                    };
+
+                    // Request data every second to ensure smooth recording
+                    mediaRecorder.start(1000);
+                    recordBtn.classList.add('recording');
+                } catch (error) {
+                    console.error('Error starting recording:', error);
+                    alert('Failed to start recording. Please make sure to grant screen sharing permission.');
+                    return;
+                }
+            }
+            isRecording = !isRecording;
 
                 try {
                     mediaRecorder = new MediaRecorder(stream, options);

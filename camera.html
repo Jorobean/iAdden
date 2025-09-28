@@ -4,8 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <title>Camera</title>
-    <style>
+    <title>Camera</titl                    // Keep PiP video playing and handle effects
+                    pipWindow.addEventListener('play', () => {
+                        if (isLightOn) {
+                            document.pictureInPictureElement.style.filter = 'brightness(1.5)';
+                        }
+                    });
+                    
+                    // Ensure video stays playing
+                    cameraVideo.play().catch(console.error);yle>
         * {
             margin: 0;
             padding: 0;
@@ -203,40 +210,22 @@
                 const constraints = {
                     video: {
                         facingMode: currentFacingMode,
-                        width: { min: 1920, ideal: 3840 },  // 4K support if available
-                        height: { min: 1080, ideal: 2160 },
-                        frameRate: { ideal: 60 },           // 60fps for smooth video
-                        aspectRatio: 16/9,                 // Maintain aspect ratio
-                        resizeMode: 'crop-and-scale'       // Ensure full coverage
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 },
+                        frameRate: { ideal: 30 },
+                        aspectRatio: 16/9
                     },
-                    audio: false  // Disable audio track completely
-                };
-
-                // Function to ensure highest quality
-                const ensureHighQuality = async (track) => {
-                    const capabilities = track.getCapabilities();
-                    const settings = {
-                        width: Math.min(capabilities.width?.max || 3840, 3840),
-                        height: Math.min(capabilities.height?.max || 2160, 2160),
-                        frameRate: Math.min(capabilities.frameRate?.max || 60, 60),
-                        resizeMode: 'crop-and-scale'
-                    };
-                    await track.applyConstraints(settings);
+                    audio: false
                 };
 
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
-                
-                // Apply highest quality settings to video track
-                const videoTrack = stream.getVideoTracks()[0];
-                if (videoTrack) {
-                    await ensureHighQuality(videoTrack);
-                }
 
                 cameraVideo.srcObject = stream;
+                await cameraVideo.play().catch(console.error);
                 
-                // Set video element properties for better quality
-                cameraVideo.setAttribute('playsinline', true);
-                cameraVideo.setAttribute('webkit-playsinline', true);
+                // Set video element properties
+                cameraVideo.setAttribute('playsinline', '');
+                cameraVideo.setAttribute('webkit-playsinline', '');
                 cameraVideo.style.objectFit = 'cover';
 
                 // Hide PiP button if not supported

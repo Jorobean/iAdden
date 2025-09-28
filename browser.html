@@ -265,7 +265,7 @@
         const declineBtn = document.getElementById('declineBtn');
         const permissionBanner = document.querySelector('.permission-banner');
 
-        // Recording functionality
+        // Recording functionality with MP4 support
         recordBtn.addEventListener('click', async () => {
             if (isRecording) {
                 mediaRecorder.stop();
@@ -273,25 +273,45 @@
             } else {
                 recordedChunks = [];
                 const stream = cameraVideo.srcObject;
-                mediaRecorder = new MediaRecorder(stream);
+                
+                // Try to use H.264 codec for maximum compatibility
+                const mimeType = 'video/mp4; codecs="avc1.42E01E, mp4a.40.2"';
+                const options = {
+                    mimeType: MediaRecorder.isTypeSupported(mimeType) ? mimeType : 'video/webm',
+                    videoBitsPerSecond: 8000000, // 8 Mbps for high quality
+                    audioBitsPerSecond: 128000   // 128 kbps audio
+                };
+
+                try {
+                    mediaRecorder = new MediaRecorder(stream, options);
+                } catch (e) {
+                    console.warn('Failed to create MediaRecorder with preferred options, falling back to default', e);
+                    mediaRecorder = new MediaRecorder(stream);
+                }
                 
                 mediaRecorder.ondataavailable = (e) => {
                     if (e.data.size > 0) recordedChunks.push(e.data);
                 };
 
-                mediaRecorder.onstop = () => {
-                    const blob = new Blob(recordedChunks, { type: 'video/webm' });
+                mediaRecorder.onstop = async () => {
+                    const blob = new Blob(recordedChunks, { type: 'video/mp4' });
+                    
+                    // Create a timestamp for the filename
+                    const date = new Date();
+                    const timestamp = `${date.getFullYear()}-${(date.getMonth()+1).toString().padStart(2,'0')}-${date.getDate().toString().padStart(2,'0')}_${date.getHours().toString().padStart(2,'0')}-${date.getMinutes().toString().padStart(2,'0')}`;
+                    
                     const url = URL.createObjectURL(blob);
                     const a = document.createElement('a');
                     a.href = url;
-                    a.download = 'camera-recording.webm';
+                    a.download = `camera-recording_${timestamp}.mp4`;
                     document.body.appendChild(a);
                     a.click();
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
                 };
 
-                mediaRecorder.start();
+                // Request data every second to ensure smooth recording
+                mediaRecorder.start(1000);
                 recordBtn.classList.add('recording');
             }
             isRecording = !isRecording;
@@ -325,8 +345,18 @@
             try {
                 // Request camera permission
                 cameraStream = await navigator.mediaDevices.getUserMedia({ 
-                    video: { facingMode: currentFacingMode },
-                    audio: false
+                    video: { 
+                        facingMode: currentFacingMode,
+                        width: { ideal: 3840 }, // 4K
+                        height: { ideal: 2160 },
+                        frameRate: { ideal: 60 }
+                    },
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 48000,
+                        channelCount: 2
+                    }
                 });
                 cameraVideo.srcObject = cameraStream;
                 permissionBanner.classList.remove('active');
@@ -427,8 +457,18 @@
             try {
                 // Start new stream with different camera
                 cameraStream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: currentFacingMode },
-                    audio: false
+                    video: { 
+                        facingMode: currentFacingMode,
+                        width: { ideal: 3840 }, // 4K
+                        height: { ideal: 2160 },
+                        frameRate: { ideal: 60 }
+                    },
+                    audio: {
+                        echoCancellation: true,
+                        noiseSuppression: true,
+                        sampleRate: 48000,
+                        channelCount: 2
+                    }
                 });
                 cameraVideo.srcObject = cameraStream;
 

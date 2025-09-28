@@ -67,14 +67,14 @@
             opacity: 1;
         }
         
-        /* Ensure PiP video is also mirrored */
+        /* PiP should not add additional mirroring since main video is already mirrored */
         video:picture-in-picture {
-            transform: scaleX(-1) !important;
+            transform: none !important;
         }
         
         @media all and (display-mode: picture-in-picture) {
             video {
-                transform: scaleX(-1) !important;
+                transform: none !important;
             }
         }
 
@@ -295,12 +295,10 @@
                         cameraVideo.play().catch(err => console.log('Playback prevented'));
                     });
                     
-                    // Ensure PiP window maintains mirroring
-                    document.pictureInPictureElement.style.transform = 'scaleX(-1)';
-                    
+                    // Don't apply transform since video is already mirrored
                     // Apply light overlay to PiP if it's active
                     if (isLightOn) {
-                        document.pictureInPictureElement.style.filter = 'brightness(1.5) saturate(1.1)';
+                        cameraVideo.style.filter = 'brightness(1.5) saturate(1.1)';
                     }
 
                     // Ensure audio stays muted in PiP mode
@@ -361,10 +359,8 @@
             // Apply light effect to main page
             lightOverlay.classList.toggle('active', isLightOn);
             
-            // Apply light effect to PiP window if active
-            if (document.pictureInPictureElement) {
-                document.pictureInPictureElement.style.filter = isLightOn ? 'brightness(1.5) saturate(1.1)' : 'none';
-            }
+            // Apply light effect to the video element itself (works in both normal and PiP)
+            cameraVideo.style.filter = isLightOn ? 'brightness(1.5) saturate(1.1)' : 'none';
         });
 
         // Apply CSS properties that prevent overlay from being captured

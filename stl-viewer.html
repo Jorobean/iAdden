@@ -55,7 +55,16 @@
                 flex-wrap: nowrap;
                 justify-content: center;
                 width: auto;
-                max-width: calc(100% - 90px);
+                max-width: calc(100% - 32px);
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            #screenshotButton {
+                position: fixed;
+                left: auto;
+                right: calc(50% - 24px);
+                transform: translateX(calc(100% + 8px));
             }
 
             .control-group {
@@ -97,13 +106,13 @@
             z-index: 100;
             background-color: rgba(0, 0, 0, 0.7);
             padding: 6px 16px;
-            border-radius: 16px;
+            border-radius: 9999px;
             display: flex;
             flex-direction: row;
             gap: 8px;
             align-items: center;
             width: fit-content;
-            max-width: calc(100% - 140px);
+            max-width: calc(100% - 180px);
             backdrop-filter: blur(30px) saturate(180%);
             -webkit-backdrop-filter: blur(30px) saturate(180%);
             border: 0.5px solid rgba(255, 255, 255, 0.2);
@@ -363,7 +372,7 @@
             backdrop-filter: blur(30px) saturate(180%);
             -webkit-backdrop-filter: blur(30px) saturate(180%);
             border: 0.5px solid rgba(255, 255, 255, 0.2);
-            border-radius: 16px;
+            border-radius: 9999px;
             padding: 6px 16px;
             width: 48px;
             height: 48px;

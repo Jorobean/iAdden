@@ -167,9 +167,9 @@
                 const constraints = {
                     video: {
                         facingMode: currentFacingMode,
-                        width: { min: 3840, ideal: 7680 },  // 8K support if available
-                        height: { min: 2160, ideal: 4320 },
-                        frameRate: { ideal: 120, min: 60 }, // 120fps for ultra smooth video
+                        width: { min: 1280, ideal: 1920 },  // 1080p quality
+                        height: { min: 720, ideal: 1080 },
+                        frameRate: { ideal: 60, min: 30 },  // 60fps for smooth video
                         aspectRatio: 16/9,                  // Maintain aspect ratio
                         resizeMode: 'crop-and-scale'        // Ensure full coverage
                     },
@@ -189,9 +189,9 @@
                 const ensureHighQuality = async (track) => {
                     const capabilities = track.getCapabilities();
                     const settings = {
-                        width: Math.min(capabilities.width?.max || 7680, 7680),  // Up to 8K width
-                        height: Math.min(capabilities.height?.max || 4320, 4320), // Up to 8K height
-                        frameRate: Math.min(capabilities.frameRate?.max || 120, 120), // Up to 120fps
+                        width: Math.min(capabilities.width?.max || 1920, 1920),  // Up to 1080p width
+                        height: Math.min(capabilities.height?.max || 1080, 1080), // Up to 1080p height
+                        frameRate: Math.min(capabilities.frameRate?.max || 60, 60), // Up to 60fps
                         resizeMode: 'crop-and-scale'
                     };
                     await track.applyConstraints(settings);

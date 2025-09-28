@@ -37,6 +37,14 @@
             width: 100%;
             height: 100%;
             object-fit: cover;
+        }
+
+        video::-webkit-media-controls {
+            display: none !important;
+        }
+
+        /* Mirror only in PiP mode */
+        :picture-in-picture {
             transform: scaleX(-1);
         }
 
@@ -70,17 +78,59 @@
             height: 20px;
             fill: white;
         }
+
+        .controls-container {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 1000;
+        }
+
+        .volume-slider {
+            -webkit-appearance: none;
+            appearance: none;
+            height: 3px;
+            background: rgba(255,255,255,0.3);
+            outline: none;
+            margin: auto 0;
+            border-radius: 2px;
+        }
+
+        .volume-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+
+        .volume-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            cursor: pointer;
+            border: none;
+        }
     </style>
 </head>
 <body>
     <div class="video-container">
-        <video id="cameraVideo" autoplay playsinline muted></video>
-        <button class="pip-button" id="pipBtn">
-            <svg viewBox="0 0 24 24">
-                <path d="M19 7h-8v6h8V7zm2-4H3C2 3 1 4 1 5v14c0 1 1 2 2 2h18c1 0 2-1 2-2V5c0-1-1-2-2-2zm0 16H3V5h18v14z"/>
-            </svg>
-            Picture in Picture
-        </button>
+        <video id="cameraVideo" autoplay playsinline></video>
+        <div class="controls-container">
+            <button class="pip-button" id="pipBtn">
+                <svg viewBox="0 0 24 24">
+                    <path d="M19 7h-8v6h8V7zm2-4H3C2 3 1 4 1 5v14c0 1 1 2 2 2h18c1 0 2-1 2-2V5c0-1-1-2-2-2zm0 16H3V5h18v14z"/>
+                </svg>
+                Picture in Picture
+            </button>
+            <input type="range" id="volumeSlider" class="volume-slider" min="0" max="1" step="0.1" value="1">
+        </div>
     </div>
 
     <script>
@@ -96,14 +146,48 @@
                 const constraints = {
                     video: {
                         facingMode: currentFacingMode,
-                        width: isIOS ? { min: 640, ideal: 1280, max: 1920 } : { ideal: 1920 },
-                        height: isIOS ? { min: 480, ideal: 720, max: 1080 } : { ideal: 1080 }
+                        width: { min: 1920, ideal: 3840 },  // 4K support if available
+                        height: { min: 1080, ideal: 2160 },
+                        frameRate: { ideal: 60 },           // 60fps for smooth video
+                        aspectRatio: 16/9,                 // Maintain aspect ratio
+                        resizeMode: 'crop-and-scale'       // Ensure full coverage
                     },
-                    audio: false
+                    audio: {
+                        echoCancellation: true,      // Reduce echo
+                        noiseSuppression: true,      // Reduce background noise
+                        autoGainControl: true,       // Automatically adjust volume
+                        channelCount: 2,             // Stereo audio
+                        sampleRate: 48000,           // High-quality sample rate
+                        sampleSize: 16               // 16-bit audio
+                    }
+                };
+
+                // Function to ensure highest quality
+                const ensureHighQuality = async (track) => {
+                    const capabilities = track.getCapabilities();
+                    const settings = {
+                        width: Math.min(capabilities.width?.max || 3840, 3840),
+                        height: Math.min(capabilities.height?.max || 2160, 2160),
+                        frameRate: Math.min(capabilities.frameRate?.max || 60, 60),
+                        resizeMode: 'crop-and-scale'
+                    };
+                    await track.applyConstraints(settings);
                 };
 
                 const stream = await navigator.mediaDevices.getUserMedia(constraints);
+                
+                // Apply highest quality settings to video track
+                const videoTrack = stream.getVideoTracks()[0];
+                if (videoTrack) {
+                    await ensureHighQuality(videoTrack);
+                }
+
                 cameraVideo.srcObject = stream;
+                
+                // Set video element properties for better quality
+                cameraVideo.setAttribute('playsinline', true);
+                cameraVideo.setAttribute('webkit-playsinline', true);
+                cameraVideo.style.objectFit = 'cover';
 
                 // Hide PiP button if not supported
                 if (!document.pictureInPictureEnabled) {
@@ -149,7 +233,29 @@
         });
 
         // Initialize on page load
-        window.addEventListener('load', initCamera);
+        // Volume control
+        const volumeSlider = document.getElementById('volumeSlider');
+        volumeSlider.addEventListener('input', (e) => {
+            cameraVideo.volume = e.target.value;
+        });
+
+        // Initialize audio context for iOS
+        async function initAudioContext() {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioContext = new AudioContext();
+            
+            if (audioContext.state === 'suspended') {
+                await audioContext.resume();
+            }
+            
+            return audioContext;
+        }
+
+        // Initialize everything on load
+        window.addEventListener('load', async () => {
+            await initCamera();
+            await initAudioContext();
+        });
 
         // Handle iOS orientation changes
         window.addEventListener('orientationchange', () => {
